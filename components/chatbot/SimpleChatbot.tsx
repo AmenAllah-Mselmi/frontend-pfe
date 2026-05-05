@@ -61,8 +61,16 @@ export default function SimpleChatbot() {
 
       setMessages(prev => [...prev, { role: 'bot', content: text }]);
     } catch (err: any) {
-      setError("Désolé, une erreur est survenue.");
-      console.error(err);
+      const errorMessage = err?.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('high demand')) {
+        setMessages(prev => [...prev, { 
+          role: 'bot', 
+          content: "⏳ Le service d'IA (Gemini) est actuellement surchargé (erreur 503). Merci de réessayer d'ici quelques minutes !" 
+        }]);
+      } else {
+        setError("Désolé, une erreur est survenue.");
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }

@@ -48,7 +48,7 @@ export default function ContactsTable({ contacts, onContactClick, onEdit, onDele
                   <div><p className="font-medium">{contact.name}</p><p className="text-xs text-gray-500">{contact.email}</p></div>
                 </div>
               </td>
-              <td className="px-6 py-4"><div className="flex items-center gap-1"><Building2 size={14} className="text-gray-400" />{contact.company}</div></td>
+              <td className="px-6 py-4"><div className="flex items-center gap-1"><Building2 size={14} className="text-gray-400" />{contact.company?.name || 'N/A'}</div></td>
               <td className="px-6 py-4"><div className="flex items-center gap-1"><Briefcase size={14} className="text-gray-400" />{contact.position}</div></td>
               <td className="px-6 py-4"><div className="flex gap-2"><Mail size={14} className="text-gray-400" /><Phone size={14} className="text-gray-400" /></div></td>
               <td className="px-6 py-4"><span className={`px-2 py-1 text-xs rounded-full ${statusColors[contact.status]}`}>{contact.status}</span></td>

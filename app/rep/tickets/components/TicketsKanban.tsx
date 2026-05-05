@@ -21,10 +21,10 @@ export default function TicketsKanban({ tickets, onViewDetails, onEdit, onDelete
   ];
 
   const priorityColors: any = {
-    'critical': 'bg-red-100 text-red-700',
-    'high': 'bg-orange-100 text-orange-700',
-    'medium': 'bg-yellow-100 text-yellow-700',
-    'low': 'bg-green-100 text-green-700'
+    'CRITICAL': 'bg-red-100 text-red-700',
+    'HIGH': 'bg-orange-100 text-orange-700',
+    'MEDIUM': 'bg-yellow-100 text-yellow-700',
+    'LOW': 'bg-green-100 text-green-700'
   };
 
   const columnColors: any = {

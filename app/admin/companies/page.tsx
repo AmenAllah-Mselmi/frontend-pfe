@@ -11,6 +11,8 @@ import DeleteCompanyModal from './components/DeleteCompanyModal';
 import CSVImportWizard from '@/components/CSVImportWizard';
 import { useCompanyStore, Company } from '@/lib/companyStore';
 import { exportToCSV } from '@/lib/exportCsv';
+import Pagination from '@/components/Pagination';
+import { Search } from 'lucide-react';
 
 export default function CompaniesPage() {
   const [showFilters, setShowFilters] = useState(false);
@@ -22,20 +24,40 @@ export default function CompaniesPage() {
   const [showImport, setShowImport] = useState(false);
   const [companyToEdit, setCompanyToEdit] = useState<any>(null);
   const [companyToDelete, setCompanyToDelete] = useState<any>(null);
-  const { companies, loadCompanies, addCompany, updateCompany, deleteCompany } = useCompanyStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { companies, totalItems, loadCompanies, addCompany, updateCompany, deleteCompany } = useCompanyStore();
+  
   useEffect(() => {
-    loadCompanies();
-  }, [loadCompanies]);
+    loadCompanies(currentPage, itemsPerPage);
+  }, [loadCompanies, currentPage, itemsPerPage]);
+
   // Normalize companies into a typed array in case API returns a wrapper
   const companyList: Company[] = Array.isArray(companies)
     ? companies
-    : Array.isArray((companies as unknown as { companies?: Company[] })?.companies)
-    ? (companies as unknown as { companies: Company[] }).companies
+    : Array.isArray((companies as unknown as { data?: Company[] })?.data)
+    ? (companies as unknown as { data: Company[] }).data
     : [];
 
   const selectedCompanyData = selectedCompany !== null
     ? companyList.find(c => c.id === selectedCompany)
     : null;
+ 
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>(companyList);
+ 
+  useEffect(() => {
+    let filtered = [...companyList];
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(c => 
+        (c.name || '').toLowerCase().includes(q) || 
+        (c.companyIndustry || '').toLowerCase().includes(q)
+      );
+    }
+    setFilteredCompanies(filtered);
+  }, [searchQuery, companies]);
 
   // Handlers
   const handleEditCompany = (company: any) => {
@@ -88,13 +110,28 @@ export default function CompaniesPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="p-4 sm:p-6 max-w-7xl mx-auto">
         <CompaniesHeader
-          totalCompanies={companyList.length}
+          totalCompanies={totalItems}
           onFilterClick={() => setShowFilters(!showFilters)}
-          onExport={() => exportToCSV(companyList, 'companies')}
+          onExport={async () => {
+            const allCompanies = await useCompanyStore.getState().fetchAllCompanies();
+            exportToCSV(allCompanies, 'companies');
+          }}
         />
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
-          <h2 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">All Companies</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">All Companies</h2>
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search companies..."
+                className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-sm"
+              />
+            </div>
+          </div>
           <AddButton
             onAdd={() => setShowCompanyForm(true)}
             onImport={() => setShowImport(true)}
@@ -114,11 +151,20 @@ export default function CompaniesPage() {
 
         <div className="bg-white rounded-xl shadow-sm border">
           <CompaniesTable
-            data={companyList}
+            data={filteredCompanies}
             onCompanyClick={(id) => setSelectedCompany(id)}
             onEdit={handleEditCompany}
             onDelete={handleDeleteCompany}
           />
+          <div className="border-t px-4 py-3">
+             <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+          </div>
         </div>
       </div>
 

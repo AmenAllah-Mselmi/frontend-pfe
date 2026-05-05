@@ -1,9 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { 
   X, Mail, Phone, Building2, User, Briefcase, Calendar, 
-  Edit, Trash2, Check, X as XIcon, History, MapPin, Globe
+  Edit, Trash2, Check, X as XIcon, History, MapPin, Globe,
+  BarChart3, MessageSquare, Users, Target, TrendingUp
 } from 'lucide-react';
+import AnalyticsCharts from '@/app/admin/analytics/components/AnalyticsCharts';
 import EmailModalRepresentative from './EmailModalRepresentative';
 import EmailHistoryModalRepresentative from './EmailHistoryModalRepresentative';
 
@@ -12,6 +15,18 @@ export default function ContactDetailsModal({ contact, onClose, onUpdate, onDele
   const [editedNotes, setEditedNotes] = useState(contact.notes || '');
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [analytics, setAnalytics] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || '';
+        const res = await fetch(`${base}/analytics/contact/${contact.id}`, { credentials: 'include' });
+        if (res.ok) setAnalytics(await res.json());
+      } catch (e) { console.error(e); }
+    };
+    if (contact?.id) fetchAnalytics();
+  }, [contact?.id]);
 
   const statusColors: any = {
     'Active': 'bg-green-100 text-green-700',
@@ -28,7 +43,7 @@ export default function ContactDetailsModal({ contact, onClose, onUpdate, onDele
 
   const handleSendEmail = (emailData: any) => {
     console.log('Sending email:', emailData);
-    alert(`Email sent to ${contact.name}`);
+    toast.success(`Email sent to ${contact.name}`);
     setShowEmailModal(false);
   };
 
@@ -50,7 +65,7 @@ export default function ContactDetailsModal({ contact, onClose, onUpdate, onDele
               </div>
               <div>
                 <h2 className="text-2xl font-bold">{contact.name}</h2>
-                <p className="text-sm text-gray-500">{contact.position} • {contact.company}</p>
+                <p className="text-sm text-gray-500">{contact.position} • {contact.company?.name || 'N/A'}</p>
                 {!canEdit && (
                   <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full mt-1 inline-block">
                     Team contact • Read only
@@ -90,7 +105,7 @@ export default function ContactDetailsModal({ contact, onClose, onUpdate, onDele
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Building2 size={16} className="text-gray-400" />
-                    <span>{contact.company}</span>
+                    <span>{contact.company?.name || 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Briefcase size={16} className="text-gray-400" />
@@ -125,6 +140,35 @@ export default function ContactDetailsModal({ contact, onClose, onUpdate, onDele
                 </div>
               </div>
             </div>
+
+            {/* Engagement Analytics */}
+            {analytics && (
+              <div className="border-t pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 size={16} className="text-emerald-600" />
+                  <h3 className="font-semibold text-gray-700">Analyse d'Engagement</h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                  <div className="p-3 bg-gray-50 rounded-xl text-center"><p className="text-sm font-bold text-gray-900">{analytics.totalInteractions}</p><p className="text-[10px] text-gray-500">Interactions</p></div>
+                  <div className="p-3 bg-gray-50 rounded-xl text-center"><p className="text-sm font-bold text-gray-900">{analytics.totalEmails}</p><p className="text-[10px] text-gray-500">Emails</p></div>
+                  <div className="p-3 bg-gray-50 rounded-xl text-center"><p className="text-sm font-bold text-gray-900">{analytics.associatedLeads}</p><p className="text-[10px] text-gray-500">Leads associés</p></div>
+                  <div className="p-3 bg-gray-50 rounded-xl text-center"><p className="text-sm font-bold text-gray-900">{analytics.totalTickets}</p><p className="text-[10px] text-gray-500">Tickets</p></div>
+                </div>
+                <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                  <div className="flex items-center gap-2"><span className="text-xs text-gray-500">Engagement:</span><span className={`px-2 py-0.5 text-xs font-bold rounded-full ${analytics.engagementLevel === 'High' ? 'bg-green-100 text-green-700' : analytics.engagementLevel === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>{analytics.engagementLevel}</span></div>
+                  <div className="flex items-center gap-2"><span className="text-xs text-gray-500">Dernier échange:</span><span className="text-xs font-medium">{analytics.lastExchange ? new Date(analytics.lastExchange).toLocaleDateString('fr-FR') : 'Aucun'}</span></div>
+                </div>
+
+                {analytics.history && (
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mt-4">
+                    <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp size={14} className="text-emerald-500" /> Intensité de l'Engagement</h4>
+                    <div className="w-full">
+                      <AnalyticsCharts type="revenue" data={analytics.history} height={180} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Notes Section */}
             <div className="border-t pt-4">

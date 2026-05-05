@@ -27,7 +27,7 @@ export default function LeadsTable({ leads, onLeadClick, onEmail }: any) {
         <thead className="bg-gray-50 border-b">
           <tr>
             <th className="px-6 py-3 w-10"><input type="checkbox" checked={selected.length === leads.length && leads.length > 0} onChange={toggleAll} className="rounded" /></th>
-            {['Name', 'Email', 'Phone', 'Status', 'Probability', 'Value', 'Actions', ''].map(h => (
+            {['Name', 'Email', 'Phone', 'Status', 'AI Score', 'Probability', 'Value', 'Actions', ''].map(h => (
               <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{h}</th>
             ))}
           </tr>
@@ -43,12 +43,31 @@ export default function LeadsTable({ leads, onLeadClick, onEmail }: any) {
                   <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white text-sm">
                     {lead.name ? lead.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : '?'}
                   </div>
-                  <div><p className="font-medium">{lead.name}</p></div>
+                  <div>
+                    <p className="font-medium text-gray-900">{lead.name}</p>
+                    {lead.company && (
+                      <p className="text-[10px] text-gray-500 flex items-center gap-1 mt-0.5">
+                        <Building2 size={10} /> {lead.company.name}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </td>
               <td className="px-6 py-4"><span className="text-xs text-gray-500">{lead.email}</span></td>
               <td className="px-6 py-4"><span className="text-xs text-gray-500">{lead.phone}</span></td>
               <td className="px-6 py-4"><span className={`px-2 py-1 text-xs rounded-full ${statusColors[lead.status]}`}>{lead.status}</span></td>
+              <td className="px-6 py-4">
+                {lead.leadScore ? (
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-indigo-600">{lead.leadScore.score}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-sm ${lead.leadScore.temperature === 'Hot' ? 'bg-red-100 text-red-700' : lead.leadScore.temperature === 'Warm' ? 'bg-yellow-100 text-yellow-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                      {lead.leadScore.temperature}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-400">N/A</span>
+                )}
+              </td>
               <td className="px-6 py-4 text-sm">{lead.probability || 0}%</td>
               <td className="px-6 py-4 font-semibold">{lead.dealValue ? lead.dealValue.toLocaleString() : 0}€</td>
               <td className="px-6 py-4">

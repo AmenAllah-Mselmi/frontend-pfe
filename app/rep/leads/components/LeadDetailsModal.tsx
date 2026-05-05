@@ -1,12 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import {
   X, FileText, CheckSquare, Plus, Calendar, User,
   Building2, DollarSign, Trash2, CheckCircle,
-  Mail, Phone, Edit, AlertCircle
+  Mail, Phone, Edit, AlertCircle,
+  Brain, Sparkles, Flame, Thermometer, Snowflake, ChevronRight,
+  Clock, BarChart3, Activity, TrendingUp
 } from 'lucide-react';
+import AnalyticsCharts from '@/app/admin/analytics/components/AnalyticsCharts';
 import EditLeadModal from './EditLeadModal';
 import DeleteLeadModal from './DeleteLeadModal';
+import AiEmailModal from './AiEmailModal';
 
 export default function LeadDetailsModal({
   lead, onClose, onAddNote, onDeleteNote, onUpdateNote, onAddTask,
@@ -24,9 +29,44 @@ export default function LeadDetailsModal({
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAiEmailModal, setShowAiEmailModal] = useState(false);
   const [showPipelineSelect, setShowPipelineSelect] = useState(false);
   const [pipelines, setPipelines] = useState<any[]>([]);
   const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(null);
+
+  const [scoreData, setScoreData] = useState<any>(null);
+  const [isScoring, setIsScoring] = useState(false);
+  const [leadAnalytics, setLeadAnalytics] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchScore = async () => {
+      setIsScoring(true);
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || '';
+        const res = await fetch(`${base}/lead-scoring/${lead.id}`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setScoreData(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch lead score', err);
+      }
+      setIsScoring(false);
+    };
+    if (lead?.id) fetchScore();
+  }, [lead?.id]);
+
+  useEffect(() => {
+    const fetchLeadAnalytics = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || '';
+        const res = await fetch(`${base}/analytics/lead/${lead.id}`, { credentials: 'include' });
+        if (res.ok) setLeadAnalytics(await res.json());
+      } catch (e) { console.error(e); }
+    };
+    if (lead?.id) fetchLeadAnalytics();
+  }, [lead?.id]);
+
 
   const handleConvertToDealClick = async () => {
     try {
@@ -91,9 +131,9 @@ export default function LeadDetailsModal({
   return (
     <>
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden">
+        <div className="bg-white rounded-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col overflow-hidden">
           {/* Header avec boutons d'action */}
-          <div className="p-6 border-b flex justify-between items-start sticky top-0 bg-white">
+          <div className="p-6 border-b flex justify-between items-start bg-white shrink-0 z-10">
             <div className="flex items-center gap-4">
               <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold ${canModify ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' : 'bg-gradient-to-br from-gray-500 to-gray-600'
                 }`}>
@@ -101,7 +141,7 @@ export default function LeadDetailsModal({
               </div>
               <div>
                 <h2 className="text-2xl font-bold">{lead.name}</h2>
-                <p className="text-sm text-gray-500">{lead.company}</p>
+                <p className="text-sm text-gray-500">{lead.company?.name || 'N/A'}</p>
                 {!canModify && (
                   <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full mt-1 inline-block">
                     Team lead • Read only
@@ -146,6 +186,9 @@ export default function LeadDetailsModal({
                       <button onClick={handleConvertToDealClick} className="px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg text-sm font-medium hover:bg-emerald-100 transition whitespace-nowrap">
                         Convert to Deal
                       </button>
+                      <button onClick={() => setShowAiEmailModal(true)} className="px-3 py-1.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg text-sm font-medium hover:bg-indigo-100 transition whitespace-nowrap flex items-center gap-1.5">
+                        <Sparkles size={14} /> Generate AI Email
+                      </button>
                     </>
                   )}
                   <button
@@ -171,9 +214,9 @@ export default function LeadDetailsModal({
           </div>
 
           {/* Reste du contenu inchangé... */}
-          <div className="flex h-full">
+          <div className="flex flex-1 overflow-hidden">
             {/* Left Panel - Lead Info */}
-            <div className="w-1/3 p-6 border-r bg-gray-50">
+            <div className="w-1/3 p-6 border-r bg-gray-50 overflow-y-auto">
               <div className="space-y-4">
                 <div className="bg-white p-4 rounded-xl">
                   <h3 className="font-semibold mb-3">Lead Information</h3>
@@ -181,7 +224,7 @@ export default function LeadDetailsModal({
                     <div className="flex items-center gap-2 text-sm"><User size={16} className="text-gray-400" /><span>{lead.name}</span></div>
                     <div className="flex items-center gap-2 text-sm"><Mail size={16} className="text-gray-400" /><span>{lead.email}</span></div>
                     <div className="flex items-center gap-2 text-sm"><Phone size={16} className="text-gray-400" /><span>{lead.phone}</span></div>
-                    <div className="flex items-center gap-2 text-sm"><Building2 size={16} className="text-gray-400" /><span>{lead.company}</span></div>
+                    <div className="flex items-center gap-2 text-sm"><Building2 size={16} className="text-gray-400" /><span>{lead.company?.name || 'N/A'}</span></div>
                   </div>
                 </div>
 
@@ -206,6 +249,111 @@ export default function LeadDetailsModal({
                     </div>
                   </div>
                 </div>
+
+                {/* Lead Analytics Card */}
+                {leadAnalytics && (
+                  <div className="bg-white p-4 rounded-xl">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2"><BarChart3 size={14} className="text-emerald-500" /> Analyse de Progression</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm"><span className="text-gray-500 flex items-center gap-1"><Clock size={12} /> Pipeline</span><span className="font-bold">{leadAnalytics.timeInPipeline} jours</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-gray-500 flex items-center gap-1"><Activity size={12} /> Dernière activité</span><span className="font-medium text-xs">{leadAnalytics.lastActivity ? new Date(leadAnalytics.lastActivity).toLocaleDateString('fr-FR') : 'N/A'}</span></div>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div className="p-2 bg-blue-50 rounded-lg text-center"><p className="text-sm font-bold text-blue-700">{leadAnalytics.notesCount}</p><p className="text-[9px] text-blue-500">Notes</p></div>
+                        <div className="p-2 bg-green-50 rounded-lg text-center"><p className="text-sm font-bold text-green-700">{leadAnalytics.completedTasks}/{leadAnalytics.tasksCount}</p><p className="text-[9px] text-green-500">Tâches</p></div>
+                        <div className="p-2 bg-orange-50 rounded-lg text-center"><p className="text-sm font-bold text-orange-700">{leadAnalytics.ticketsCount}</p><p className="text-[9px] text-orange-500">Tickets</p></div>
+                        <div className="p-2 bg-purple-50 rounded-lg text-center"><p className="text-sm font-bold text-purple-700">{leadAnalytics.emailsCount}</p><p className="text-[9px] text-purple-500">Emails</p></div>
+                      </div>
+                      <div><div className="flex justify-between text-[10px] text-gray-500 mb-1"><span>Score AI</span><span>{leadAnalytics.score}/100</span></div><div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style={{ width: `${Math.min(leadAnalytics.score, 100)}%` }} /></div></div>
+                    </div>
+                  </div>
+                )}
+                {/* Lead History Charts (Own Curves) */}
+                {leadAnalytics?.history && (
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mt-4">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2"><TrendingUp size={14} className="text-emerald-500" /> Évolution Engagement</h3>
+                    <div className="w-full">
+                      <AnalyticsCharts type="revenue" data={leadAnalytics.history.map((h: any) => ({ month: h.month, value: h.activities + h.emails }))} height={180} />
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Insights Card */}
+                {isScoring ? (
+                  <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 text-white p-5 rounded-2xl shadow-xl relative overflow-hidden group border border-indigo-500/30 flex items-center justify-center min-h-[250px]">
+                     <div className="flex flex-col items-center">
+                        <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mb-3 shadow-[0_0_15px_rgba(129,140,248,0.5)]"></div>
+                        <span className="text-indigo-200 text-sm font-semibold animate-pulse">Running AI Analysis...</span>
+                     </div>
+                  </div>
+                ) : scoreData ? (
+                  <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 text-white p-5 rounded-2xl shadow-xl relative overflow-hidden group border border-indigo-500/30">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-700">
+                      <Brain size={140} />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Sparkles size={20} className="text-yellow-400 animate-pulse" />
+                        <h3 className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">AI Lead Intelligence</h3>
+                      </div>
+                      
+                      <div className="flex items-end gap-3 mb-5">
+                        <div>
+                          <span className="text-xs text-indigo-200 font-medium tracking-wide uppercase">Win Probability</span>
+                          <div className="text-4xl font-extrabold flex items-baseline gap-1 mt-1 drop-shadow-md">
+                            {scoreData.probability ? Math.round(scoreData.probability * 100) : 0}<span className="text-xl text-indigo-300">%</span>
+                          </div>
+                        </div>
+                        <div className="mb-1.5 ml-auto">
+                          {scoreData.temperature === 'Hot' ? (
+                            <span className="px-3 py-1.5 bg-red-500/20 text-red-300 border border-red-500/40 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.3)]"><Flame size={14}/> HOT LEAD</span>
+                          ) : scoreData.temperature === 'Warm' ? (
+                            <span className="px-3 py-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.3)]"><Thermometer size={14}/> WARM LEAD</span>
+                          ) : (
+                            <span className="px-3 py-1.5 bg-blue-500/20 text-blue-300 border border-blue-500/40 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(59,130,246,0.3)]"><Snowflake size={14}/> COLD LEAD</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 mb-5">
+                        <span className="text-[10px] uppercase tracking-widest text-indigo-300/80 font-bold">Key Insights</span>
+                        <ul className="space-y-2">
+                          {scoreData.reasons && (typeof scoreData.reasons === 'string' ? JSON.parse(scoreData.reasons) : scoreData.reasons).map((reason: string, idx: number) => {
+                            const isAction = reason.startsWith('Action:');
+                            if(isAction) return null;
+                            return (
+                              <li key={idx} className="flex items-start gap-2 text-xs text-indigo-50 bg-white/5 p-2.5 rounded-xl border border-white/10 backdrop-blur-md shadow-sm hover:bg-white/10 transition-colors">
+                                <ChevronRight size={14} className="text-indigo-400 shrink-0 mt-0.5" />
+                                <span className="leading-relaxed">{reason}</span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
+
+                      <div className="bg-white/10 p-3.5 rounded-xl border border-white/20 flex flex-col gap-2 backdrop-blur-lg">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                          <span className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold">Recommended Action</span>
+                        </div>
+                        <span className="font-bold text-white text-sm">
+                          {scoreData.reasons && (typeof scoreData.reasons === 'string' ? JSON.parse(scoreData.reasons) : scoreData.reasons).find((r: string) => r.startsWith('Action:'))?.replace('Action: ', '') || 'Follow up to evaluate needs'}
+                        </span>
+                        <button 
+                          onClick={() => {
+                            const actionReason = scoreData.reasons && (typeof scoreData.reasons === 'string' ? JSON.parse(scoreData.reasons) : scoreData.reasons).find((r: string) => r.startsWith('Action:'))?.replace('Action: ', '');
+                            if (actionReason?.includes('Call')) toast.success('Initiating dialer...');
+                            // else if (actionReason?.includes('email')) onSendEmail && onSendEmail(lead); // Not available in rep modal currently
+                            else toast.success('Opening scheduler...!');
+                          }}
+                          className="mt-1 w-full py-2 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/20 border border-indigo-400/50">
+                          Execute Suggested Workflow
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 py-4 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">No AI score available yet.</div>
+                )}
               </div>
             </div>
 
@@ -523,6 +671,13 @@ export default function LeadDetailsModal({
           lead={lead}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={handleDeleteLead}
+        />
+      )}
+
+      {showAiEmailModal && (
+        <AiEmailModal
+          leadId={lead.id}
+          onClose={() => setShowAiEmailModal(false)}
         />
       )}
     </>

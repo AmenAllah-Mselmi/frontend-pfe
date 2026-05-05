@@ -52,7 +52,7 @@ export default function EmailModalRepresentative({ onClose, onSend, contact }: E
             </div>
             <div>
               <h2 className="text-xl font-semibold">New Message</h2>
-              <p className="text-sm text-gray-500">To: {contact.name} • {contact.company}</p>
+              <p className="text-sm text-gray-500">To: {contact.name} • {contact.company?.name || 'N/A'}</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">

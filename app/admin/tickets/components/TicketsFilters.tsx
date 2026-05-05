@@ -14,8 +14,8 @@ export default function TicketsFilters({ onClose, onApply, initialFilters = {} }
   const [selectedPriorities, setSelectedPriorities] = useState<string[]>(initialFilters?.priorities || []);
   const [selectedTags, setSelectedTags] = useState<string[]>(initialFilters?.tags || []);
 
-  const statuses = ['open', 'in_progress', 'pending', 'resolved', 'closed'];
-  const priorities = ['critical', 'high', 'medium', 'low'];
+  const statuses = ['NEW', 'OPEN', 'PENDING', 'RESOLVED', 'CLOSED'];
+  const priorities = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
   const categories = ['technical', 'feature', 'import', 'admin', 'billing'];
   const tags = ['bug', 'urgent', 'feature', 'import', 'sync', 'reporting', 'permissions', 'auth', 'export'];
   const assignees = ['Alex Morgan', 'Taylor Swift', 'Chris Evans', 'Jordan Lee'];

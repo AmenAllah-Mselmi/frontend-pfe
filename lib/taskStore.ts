@@ -21,6 +21,7 @@ export type Task = {
     user?: {
         name: string;
     };
+    isBroadcast?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
@@ -65,7 +66,9 @@ export const useTaskStore = create<TaskState>((set) => ({
                 throw new Error(err);
             }
             const data = await response.json();
-            set((state) => ({ tasks: [...state.tasks, data], loading: false }));
+            // In case data is nested
+            const newTask = data.data || data.task || data;
+            set((state) => ({ tasks: [...state.tasks, newTask], loading: false }));
             toast.success('Task successfully created!');
         } catch (error) {
             set({ loading: false });

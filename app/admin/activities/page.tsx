@@ -17,6 +17,7 @@ import ActivitiesStats from './components/ActivitiesStats';
 import ActivityDetailsModal from './components/ActivityDetailsModal';
 import CreateActivityModal from './components/CreateActivityModal';
 import DateRangePicker from './components/DateRangePicker';
+import Pagination from '@/components/Pagination';
 import { useActivityStore } from '@/lib/activityStore';
 
 export default function ActivitiesPage() {
@@ -27,12 +28,14 @@ export default function ActivitiesPage() {
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [dateRange, setDateRange] = useState('30d');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const { activities = [], filters = {}, setFilters, loadActivities } = useActivityStore();
+  const { activities = [], totalItems, filters = {}, setFilters, loadActivities } = useActivityStore();
 
   useEffect(() => {
-    loadActivities();
-  }, []);
+    loadActivities(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage, loadActivities]);
 
   // Client-side search filter - AVEC VÉRIFICATIONS DE SÉCURITÉ
   const filteredActivities = activities.filter(a => {
@@ -198,6 +201,15 @@ export default function ActivitiesPage() {
               setShowDetails(true);
             }}
           />
+          <div className="bg-white border-t px-4 py-3">
+             <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+          </div>
         </div>
       </div>
 

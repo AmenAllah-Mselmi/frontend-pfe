@@ -1,94 +1,159 @@
 'use client';
-import { useState } from 'react';
-import { X, Building2, Users, Mail, Phone, Globe, DollarSign } from 'lucide-react';
+
+import { X, Building2, Users, Mail, Phone, MapPin } from 'lucide-react';
+import { useForm } from '@/lib/hooks/useForm';
+import { validators } from '@/lib/utils/validation';
+import FormField from '@/components/Form/FormField';
 
 export default function EditCompanyModal({ company, onClose, onSave }: any) {
-  const [formData, setFormData] = useState({
-    name: company.name || '',
-    companyIndustry: company.companyIndustry || 'TECHNOLOGY',
-    companySize: company.companySize || 'SMALL',
-    location: company.location || '',
-    email: company.email || '',
-    phone: company.phone || ''
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useForm({
+    initialValues: {
+      name: company.name || '',
+      companyIndustry: company.companyIndustry || 'TECHNOLOGY',
+      companySize: company.companySize || 'SMALL',
+      location: company.location || '',
+      email: company.email || '',
+      phone: company.phone || ''
+    },
+    validationSchema: {
+      name: [validators.required, validators.minLength(2)],
+      email: [validators.email],
+      phone: [validators.phone]
+    },
+    onSubmit: (data) => {
+      onSave(company.id, data);
+    }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(company.id, formData);
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleBackdropClick}>
-      <div className="bg-white rounded-xl w-full max-w-lg mx-4">
-        <div className="p-6 border-b flex justify-between">
-          <h2 className="text-xl font-semibold">Edit Company</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white rounded-2xl w-full max-w-lg mx-auto shadow-2xl overflow-hidden">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
+          <h2 className="text-xl font-semibold text-gray-800">Edit Company</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="relative">
-            <Building2 size={16} className="absolute left-3 top-3 text-gray-400" />
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Company Name *"
-              required
-              className="w-full pl-9 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <FormField
+            label="Company Name"
+            name="name"
+            error={errors.name}
+            touched={touched.name}
+            icon={Building2}
+            required
+          >
+            <input 
+              placeholder="e.g. Acme Corp" 
+              value={values.name} 
+              onChange={(e) => handleChange('name', e.target.value)} 
+              onBlur={() => handleBlur('name')}
             />
+          </FormField>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField
+              label="Industry"
+              name="companyIndustry"
+            >
+              <select 
+                value={values.companyIndustry} 
+                onChange={(e) => handleChange('companyIndustry', e.target.value)}
+                className="appearance-none"
+              >
+                <option value="TECHNOLOGY">Technology</option>
+                <option value="HEALTHCARE">Healthcare</option>
+                <option value="FINANCE">Finance</option>
+                <option value="EDUCATION">Education</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </FormField>
+
+            <FormField
+              label="Company Size"
+              name="companySize"
+              icon={Users}
+            >
+              <select 
+                value={values.companySize} 
+                onChange={(e) => handleChange('companySize', e.target.value)}
+                className="appearance-none"
+              >
+                <option value="SMALL">Small (1-50)</option>
+                <option value="MEDIUM">Medium (51-200)</option>
+                <option value="LARGE">Large (200+)</option>
+              </select>
+            </FormField>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <select
-              value={formData.companyIndustry}
-              onChange={(e) => setFormData({ ...formData, companyIndustry: e.target.value })}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            >
-              <option value="TECHNOLOGY">Technology</option><option value="HEALTHCARE">Healthcare</option><option value="FINANCE">Finance</option>
-              <option value="EDUCATION">Education</option><option value="OTHER">Other</option>
-            </select>
-            <select
-              value={formData.companySize}
-              onChange={(e) => setFormData({ ...formData, companySize: e.target.value })}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            >
-              <option value="SMALL">Small (1-50)</option><option value="MEDIUM">Medium (51-200)</option><option value="LARGE">Large (200+)</option>
-            </select>
-          </div>
-
-          <div>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              placeholder="Location"
-              className="w-full pl-9 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+          <FormField
+            label="Location"
+            name="location"
+            error={errors.location}
+            touched={touched.location}
+            icon={MapPin}
+          >
+            <input 
+              placeholder="e.g. London, UK" 
+              value={values.location} 
+              onChange={(e) => handleChange('location', e.target.value)} 
+              onBlur={() => handleBlur('location')}
             />
+          </FormField>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField
+              label="Email Address"
+              name="email"
+              error={errors.email}
+              touched={touched.email}
+              icon={Mail}
+            >
+              <input 
+                type="email" 
+                placeholder="contact@company.com" 
+                value={values.email} 
+                onChange={(e) => handleChange('email', e.target.value)} 
+                onBlur={() => handleBlur('email')}
+              />
+            </FormField>
+
+            <FormField
+              label="Phone Number"
+              name="phone"
+              error={errors.phone}
+              touched={touched.phone}
+              icon={Phone}
+            >
+              <input 
+                type="tel"
+                placeholder="+1 (555) 000-0000" 
+                value={values.phone} 
+                onChange={(e) => handleChange('phone', e.target.value)} 
+                onBlur={() => handleBlur('phone')}
+              />
+            </FormField>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-2">
+            <button 
+              type="button" 
+              className="px-6 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium text-sm" 
               onClick={onClose}
-              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700"
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 font-semibold text-sm"
             >
-              Save Changes
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
       </div>
-    </div >
+    </div>
   );
 }

@@ -94,6 +94,7 @@ export default function TicketsTable({ tickets, onViewDetails, onEdit, onDelete,
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lead</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
@@ -136,6 +137,16 @@ export default function TicketsTable({ tickets, onViewDetails, onEdit, onDelete,
                   </select>
                   <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
+              </td>
+              <td className="px-6 py-4">
+                <span className={`px-2 py-1 text-[10px] font-bold rounded-md uppercase tracking-wider ${
+                  ticket.priority === 'CRITICAL' ? 'bg-red-100 text-red-700' :
+                  ticket.priority === 'HIGH' ? 'bg-orange-100 text-orange-700' :
+                  ticket.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-green-100 text-green-700'
+                }`}>
+                  {ticket.priority || 'MEDIUM'}
+                </span>
               </td>
               <td className="px-6 py-4 text-sm text-gray-600">{ticket.leadName}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{ticket.contactName}</td>

@@ -39,7 +39,7 @@ export default function DeleteLeadModal({ onClose, onConfirm, lead }: DeleteLead
             Are you sure you want to delete this lead?
           </p>
           <p className="text-sm font-medium text-gray-800 bg-gray-50 p-3 rounded-lg mb-4">
-            {lead.name} • {lead.company}
+            {lead.name} • {lead.company?.name || 'N/A'}
           </p>
           <p className="text-xs text-red-600 bg-red-50 p-3 rounded-lg">
             This action cannot be undone. All notes and tasks associated with this lead will also be deleted.

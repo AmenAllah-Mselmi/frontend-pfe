@@ -1,60 +1,167 @@
 'use client';
-import { useState } from 'react';
-import { X, User, Building2, Mail, Phone, Briefcase, Globe, MapPin } from 'lucide-react';
 
-export default function CreateContactModal({ onClose, onCreate, companies }: any) {
-  const [form, setForm] = useState({
-    name: '', email: '', phone: '', companyId: '', position: '',
-    status: 'ACTIVE', source: 'Website', notes: ''
+import { X, User, Building2, Mail, Phone, Briefcase } from 'lucide-react';
+import { useForm } from '@/lib/hooks/useForm';
+import { validators } from '@/lib/utils/validation';
+import FormField from '@/components/Form/FormField';
+import CompanySelector from '@/components/Form/CompanySelector';
+
+export default function CreateContactModal({ onClose, onCreate }: any) {
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useForm({
+    initialValues: {
+      name: '',
+      email: '',
+      phone: '',
+      companyId: undefined as number | undefined,
+      position: '',
+      status: 'ACTIVE',
+      source: 'Website',
+      notes: ''
+    },
+    validationSchema: {
+      name: [validators.required, validators.minLength(2)],
+      email: [validators.required, validators.email],
+      phone: [validators.phone],
+      position: [validators.minLength(2)]
+    },
+    onSubmit: (data) => {
+      onCreate({ 
+        ...data, 
+        companyId: data.companyId ? Number(data.companyId) : undefined 
+      });
+    }
   });
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-lg mx-4">
-        <div className="p-6 border-b flex justify-between">
-          <h2 className="text-xl font-semibold">Create New Contact</h2>
-          <button onClick={onClose}><X size={20} /></button>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white rounded-2xl w-full max-w-lg mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+          <h2 className="text-xl font-semibold text-gray-800">Create New Contact</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+            <X size={20} />
+          </button>
         </div>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          onCreate({ ...form, companyId: form.companyId ? Number(form.companyId) : undefined });
-          onClose();
-        }} className="p-6 space-y-4">
-          <div className="relative"><User size={16} className="absolute left-3 top-3 text-gray-400" /><input placeholder="Full Name *" required className="w-full pl-9 p-3 border rounded-lg" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <FormField
+            label="Full Name"
+            name="name"
+            error={errors.name}
+            touched={touched.name}
+            icon={User}
+            required
+          >
+            <input 
+              placeholder="e.g. John Doe" 
+              value={values.name} 
+              onChange={(e) => handleChange('name', e.target.value)} 
+              onBlur={() => handleBlur('name')}
+            />
+          </FormField>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative"><Mail size={16} className="absolute left-3 top-3 text-gray-400" /><input type="email" placeholder="Email" className="w-full pl-9 p-3 border rounded-lg" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-            <div className="relative"><Phone size={16} className="absolute left-3 top-3 text-gray-400" /><input placeholder="Phone" className="w-full pl-9 p-3 border rounded-lg" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField
+              label="Email"
+              name="email"
+              error={errors.email}
+              touched={touched.email}
+              icon={Mail}
+              required
+            >
+              <input 
+                type="email" 
+                placeholder="john@example.com" 
+                value={values.email} 
+                onChange={(e) => handleChange('email', e.target.value)} 
+                onBlur={() => handleBlur('email')}
+              />
+            </FormField>
+
+            <FormField
+              label="Phone"
+              name="phone"
+              error={errors.phone}
+              touched={touched.phone}
+              icon={Phone}
+            >
+              <input 
+                type="tel"
+                placeholder="+1 (555) 000-0000" 
+                value={values.phone} 
+                onChange={(e) => handleChange('phone', e.target.value)} 
+                onBlur={() => handleBlur('phone')}
+              />
+            </FormField>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <Building2 size={16} className="absolute left-3 top-3 text-gray-400" />
-              <select className="w-full pl-9 p-3 border rounded-lg appearance-none" value={form.companyId} onChange={(e) => setForm({ ...form, companyId: e.target.value })}>
-                <option value="">Select Company (Optional)</option>
-                {companies?.map((c: any) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="flex flex-col">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company (Optional)</label>
+              <CompanySelector
+                value={values.companyId}
+                onChange={(id) => handleChange('companyId', id)}
+              />
             </div>
-            <div className="relative"><Briefcase size={16} className="absolute left-3 top-3 text-gray-400" /><input placeholder="Position" className="w-full pl-9 p-3 border rounded-lg" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} /></div>
+
+            <FormField
+              label="Position"
+              name="position"
+              error={errors.position}
+              touched={touched.position}
+              icon={Briefcase}
+            >
+              <input 
+                placeholder="Software Engineer" 
+                value={values.position} 
+                onChange={(e) => handleChange('position', e.target.value)} 
+                onBlur={() => handleBlur('position')}
+              />
+            </FormField>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <select className="p-3 border rounded-lg" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-              <option value="ACTIVE">Active</option>
-              <option value="INACTIVE">Inactive</option>
-            </select>
-            <select className="p-3 border rounded-lg" value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })}>
-              <option>Website</option><option>Referral</option><option>Event</option><option>LinkedIn</option>
-            </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField label="Status" name="status">
+              <select value={values.status} onChange={(e) => handleChange('status', e.target.value)}>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </FormField>
+
+            <FormField label="Source" name="source">
+              <select value={values.source} onChange={(e) => handleChange('source', e.target.value)}>
+                <option value="Website">Website</option>
+                <option value="Referral">Referral</option>
+                <option value="Event">Event</option>
+                <option value="LinkedIn">LinkedIn</option>
+              </select>
+            </FormField>
           </div>
 
-          <textarea placeholder="Notes (optional)" rows={3} className="w-full p-3 border rounded-lg" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          <FormField label="Notes" name="notes" error={errors.notes} touched={touched.notes}>
+            <textarea 
+              placeholder="Any additional information..." 
+              rows={3} 
+              value={values.notes} 
+              onChange={(e) => handleChange('notes', e.target.value)} 
+              className="resize-none"
+            />
+          </FormField>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <button type="button" className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg" onClick={onClose}>Cancel</button>
-            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Contact</button>
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+            <button 
+              type="button" 
+              className="px-6 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium" 
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 font-semibold"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Contact'}
+            </button>
           </div>
         </form>
       </div>

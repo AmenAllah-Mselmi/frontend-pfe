@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Search, Plus, Filter, Users, UserPlus, Calendar, Upload, Download } from 'lucide-react';
+import { Search, Plus, Filter, Users, UserPlus, Calendar, Upload, Download, Sparkles } from 'lucide-react';
 import LeadsTable from './components/LeadsTable';
 import LeadsKanban from './components/LeadsKanban';
 import CreateLeadModal from './components/CreateLeadModal';
@@ -10,6 +11,7 @@ import LeadsFilters from './components/LeadsFilters';
 import LeadsStats from './components/LeadsStats';
 import LeadDetailsModal from './components/LeadDetailsModal';
 import EmailModalRepresentative from '@/app/rep/contacts/components/EmailModalRepresentative';
+import Pagination from '@/components/Pagination';
 import { useLeadStore } from '@/lib/leadStore';
 import { useNoteStore } from '@/lib/noteStore';
 import { useTaskStore } from '@/lib/taskStore';
@@ -18,9 +20,7 @@ import { exportToCSV } from '@/lib/exportCsv';
 
 const CURRENT_USER = 'Alex M.';
 
-
-
-export default function LeadsPage() {
+function LeadsContent() {
   const [view, setView] = useState<'table' | 'kanban'>('table');
   const [showFilters, setShowFilters] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -29,22 +29,55 @@ export default function LeadsPage() {
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<any>({});
+ 
+  const searchParams = useSearchParams();
+  const action = searchParams.get('action');
+ 
+  useEffect(() => {
+    if (action === 'import') {
+      setShowImport(true);
+    }
+  }, [action]);
   const [showEmail, setShowEmail] = useState(false);
   const [selectedForEmail, setSelectedForEmail] = useState<any>(null);
-
-  const { leads, loadLeads, addLead, updateLead } = useLeadStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { leads, totalItems, loadLeads, addLead, updateLead } = useLeadStore();
   const { notes, loadNotes, addNote, updateNote, deleteNote } = useNoteStore();
   const { tasks, loadTasks, addTask, updateTask, deleteTask } = useTaskStore();
   const { users, loadUsers } = useUserStore();
 
   const [filteredLeads, setFilteredLeads] = useState<any[]>(leads);
+  const scoringDone = useRef(false);
 
   useEffect(() => {
-    loadLeads();
+    loadLeads(currentPage, itemsPerPage);
     loadNotes();
     loadTasks();
     loadUsers();
-  }, [loadLeads, loadNotes, loadTasks, loadUsers]);
+  }, [loadLeads, loadNotes, loadTasks, loadUsers, currentPage, itemsPerPage]);
+
+  // Auto-calculate AI scores for leads missing them (runs once)
+  useEffect(() => {
+    if (scoringDone.current) return;
+    const calcMissing = async () => {
+      const missing = leads.filter((l: any) => !l.leadScore);
+      if (missing.length === 0) return;
+      scoringDone.current = true;
+      const base = process.env.NEXT_PUBLIC_API_URL || '';
+      try {
+        await Promise.all(
+          missing.map((l: any) =>
+            fetch(`${base}/lead-scoring/${l.id}`, { credentials: 'include' }).catch(() => null)
+          )
+        );
+        loadLeads();
+      } catch (e) {
+        console.error('Auto-scoring failed', e);
+      }
+    };
+    if (leads.length > 0) calcMissing();
+  }, [leads]);
 
   const currentUserId = users.length > 0 ? users[0].id : 2;
 
@@ -57,7 +90,8 @@ export default function LeadsPage() {
       filtered = filtered.filter(lead =>
         (lead.name || '').toLowerCase().includes(search.toLowerCase()) ||
         (lead.email || '').toLowerCase().includes(search.toLowerCase()) ||
-        (lead.phone || '').toLowerCase().includes(search.toLowerCase())
+        (lead.phone || '').toLowerCase().includes(search.toLowerCase()) ||
+        (lead.company?.name || '').toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -167,9 +201,16 @@ export default function LeadsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) console.error('Failed to send email:', await res.text());
+      if (!res.ok) {
+        console.error('Failed to send email:', await res.text());
+        toast.error('Failed to send email');
+      } else {
+        toast.success('Email sent successfully!');
+        setShowEmail(false);
+      }
     } catch (err) {
       console.error('Failed to send email', err);
+      toast.error('Failed to send email');
     }
   };
 
@@ -245,6 +286,22 @@ export default function LeadsPage() {
     tasks: tasks.filter((t) => t.leadId === selectedLead.id),
   } : null;
 
+  const handleRecalculateScores = async () => {
+    try {
+      toast.loading('Analyzing leads with AI...', { id: 'scoring' });
+      const base = process.env.NEXT_PUBLIC_API_URL || '';
+      const res = await fetch(`${base}/lead-scoring/recalculate-all`, { method: 'POST', credentials: 'include' });
+      if (res.ok) {
+        toast.success('AI Scores recalculated successfully!', { id: 'scoring' });
+        loadLeads(); // refresh the list
+      } else {
+        toast.error('Failed to recalculate scores.', { id: 'scoring' });
+      }
+    } catch (e) {
+      toast.error('Error contacting AI Service.', { id: 'scoring' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
@@ -267,7 +324,20 @@ export default function LeadsPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <button onClick={() => exportToCSV(filteredLeads, 'rep_leads')} className="flex-1 sm:flex-none relative group">
+            <button onClick={handleRecalculateScores} className="flex-1 sm:flex-none relative group">
+              <div className="absolute inset-0 bg-indigo-600 rounded-xl blur opacity-60 group-hover:opacity-80" />
+              <div className="relative flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl">
+                <Sparkles size={18} /><span className="text-sm font-medium">Run AI Analysis</span>
+              </div>
+            </button>
+            <button onClick={async () => {
+              const allLeads = await useLeadStore.getState().fetchAllLeads();
+              const exportData = allLeads.map((l: any) => ({
+                ...l,
+                companyName: l.company?.name || 'N/A'
+              }));
+              exportToCSV(exportData, 'rep_leads');
+            }} className="flex-1 sm:flex-none relative group">
               <div className="absolute inset-0 bg-purple-600 rounded-xl blur opacity-60 group-hover:opacity-80" />
               <div className="relative flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl">
                 <Download size={18} /><span className="text-sm font-medium">Export</span>
@@ -388,6 +458,15 @@ export default function LeadsPage() {
             <LeadsTable leads={filteredLeads} onLeadClick={handleLeadClick} onEmail={handleEmailSelection} /> :
             <LeadsKanban leads={filteredLeads} onLeadClick={handleLeadClick} onStatusChange={handleStatusChange} />
           }
+          <div className="bg-white border-t px-4 py-3">
+             <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+          </div>
         </div>
       </div>
 
@@ -417,7 +496,8 @@ export default function LeadsPage() {
             { key: 'phone', label: 'Phone', type: 'string' },
             { key: 'status', label: 'Status', type: 'string' },
             { key: 'dealValue', label: 'Deal Value', type: 'number' },
-            { key: 'probability', label: 'Probability', type: 'number' }
+            { key: 'probability', label: 'Probability', type: 'number' },
+            { key: 'companyId', label: 'Company ID', type: 'number' }
           ]}
         />
       )}
@@ -448,5 +528,17 @@ export default function LeadsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function LeadsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <LeadsContent />
+    </Suspense>
   );
 }

@@ -32,7 +32,7 @@ export default function DeleteLeadModal({ lead, onClose, onConfirm }: any) {
             </div>
             <div>
               <p className="font-medium text-gray-900">{lead.contact}</p>
-              <p className="text-xs text-gray-500">{lead.company} • {lead.value.toLocaleString()}€</p>
+              <p className="text-xs text-gray-500">{lead.company?.name || 'N/A'} • {lead.dealValue ? lead.dealValue.toLocaleString() : 0}€</p>
             </div>
           </div>
           

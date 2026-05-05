@@ -1,27 +1,26 @@
 'use client';
 import { useState } from 'react';
 import {
-  X, User, Calendar, MessageSquare, Paperclip,
+  X, User, Calendar,
   Clock, AlertCircle, CheckCircle, Edit, Trash2,
-  ChevronDown, Send
+  ChevronDown
 } from 'lucide-react';
 
 export default function TicketDetailsModal({ ticket, onClose, onEdit, onStatusChange }: any) {
-  const [newComment, setNewComment] = useState('');
 
   const statusColors: any = {
-    'open': 'bg-blue-100 text-blue-700',
-    'in_progress': 'bg-yellow-100 text-yellow-700',
-    'pending': 'bg-purple-100 text-blue-600',
-    'resolved': 'bg-green-100 text-green-700',
-    'closed': 'bg-gray-100 text-gray-700'
+    'NEW': 'bg-gray-100 text-gray-700',
+    'OPEN': 'bg-blue-100 text-blue-700',
+    'PENDING': 'bg-yellow-100 text-yellow-700',
+    'RESOLVED': 'bg-green-100 text-green-700',
+    'CLOSED': 'bg-red-100 text-red-700'
   };
 
   const priorityColors: any = {
-    'critical': 'bg-red-100 text-red-700',
-    'high': 'bg-orange-100 text-orange-700',
-    'medium': 'bg-yellow-100 text-yellow-700',
-    'low': 'bg-green-100 text-green-700'
+    'CRITICAL': 'bg-red-100 text-red-700',
+    'HIGH': 'bg-orange-100 text-orange-700',
+    'MEDIUM': 'bg-yellow-100 text-yellow-700',
+    'LOW': 'bg-green-100 text-green-700'
   };
 
   const formatDate = (dateString: string) => {
@@ -67,11 +66,11 @@ export default function TicketDetailsModal({ ticket, onClose, onEdit, onStatusCh
                 onChange={(e) => onStatusChange(ticket.id, e.target.value)}
                 className={`appearance-none px-4 py-2 pr-8 text-sm rounded-lg font-medium border-0 cursor-pointer ${statusColors[ticket.status]}`}
               >
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="pending">Pending</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
+                <option value="NEW">New</option>
+                <option value="OPEN">Open</option>
+                <option value="PENDING">Pending</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
               </select>
               <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -136,48 +135,6 @@ export default function TicketDetailsModal({ ticket, onClose, onEdit, onStatusCh
             </div>
           )}
 
-          {/* Comments Section */}
-          <div className="border-t pt-4">
-            <h3 className="font-semibold text-gray-700 mb-4">Comments ({ticket.comments})</h3>
-
-            {/* Comment Input */}
-            <div className="flex gap-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
-                AM
-              </div>
-              <div className="flex-1">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  rows={2}
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
-                />
-                <div className="flex justify-end mt-2">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-                    <Send size={14} />
-                    Post Comment
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Sample Comments */}
-            <div className="space-y-3">
-              <div className="flex gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
-                  TS
-                </div>
-                <div className="flex-1 bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium">Taylor Swift</span>
-                    <span className="text-xs text-gray-400">2 hours ago</span>
-                  </div>
-                  <p className="text-sm text-gray-600">Looking into this issue now. Will update soon.</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

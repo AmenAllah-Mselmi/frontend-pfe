@@ -11,11 +11,13 @@ import ContactsFilters from './components/ContactsFilters';
 import ContactsStats from './components/ContactsStats';
 import ContactDetailsModal from './components/ContactDetailsModal';
 import EmailModalRepresentative from './components/EmailModalRepresentative';
+import Pagination from '@/components/Pagination';
 
-import { useContactStore } from '@/lib/contactStore';
+import { useContactStore, Contact } from '@/lib/contactStore';
 import { exportToCSV } from '@/lib/exportCsv';
+import toast from 'react-hot-toast';
 
-const CURRENT_USER_ID = 1; // Backend generally expects numbers or we rely on actual auth. We'll use a placeholder structure.
+const CURRENT_USER_ID = 1;
 
 export default function ContactsPage() {
   const [view, setView] = useState<'table' | 'grid'>('table');
@@ -28,7 +30,9 @@ export default function ContactsPage() {
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<any>({});
-  const { contacts, loadContacts, addContact, updateContact, deleteContact } = useContactStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { contacts, totalItems, loadContacts, addContact, updateContact, deleteContact } = useContactStore();
   const [companies, setCompanies] = useState<any[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
   const [showEmail, setShowEmail] = useState(false);
@@ -36,13 +40,13 @@ export default function ContactsPage() {
 
   // Fetch Companies on Mount
   useEffect(() => {
-    loadContacts();
+    loadContacts(currentPage, itemsPerPage);
     const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/companies`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setCompanies(data); })
       .catch(() => { });
-  }, [loadContacts]);
+  }, [loadContacts, currentPage, itemsPerPage]);
 
   // Enrich & Filter contacts
   useEffect(() => {
@@ -91,9 +95,10 @@ export default function ContactsPage() {
     try {
       await addContact(data);
       setShowCreate(false);
+      toast.success('Contact successfully created!');
     } catch (err: any) {
       console.error('Create contact failed', err);
-      alert(`Create contact failed: ${err?.message || err}`);
+      toast.error(`Create contact failed: ${err?.message || err}`);
     }
   };
 
@@ -102,9 +107,10 @@ export default function ContactsPage() {
       await updateContact(contactId, updatedData);
       setShowEdit(false);
       setSelectedContact(null);
+      toast.success('Contact successfully updated!');
     } catch (err: any) {
       console.error('Update contact failed', err);
-      alert(`Update contact failed: ${err?.message || err}`);
+      toast.error(`Update contact failed: ${err?.message || err}`);
     }
   };
 
@@ -191,7 +197,14 @@ export default function ContactsPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => exportToCSV(filteredContacts, 'rep_contacts')} className="relative group">
+            <button onClick={async () => {
+              const allContacts = await useContactStore.getState().fetchAllContacts();
+              const exportData = allContacts.map((c: any) => ({
+                ...c,
+                companyName: c.company?.name || 'N/A'
+              }));
+              exportToCSV(exportData, 'rep_contacts');
+            }} className="relative group">
               <div className="absolute inset-0 bg-purple-600 rounded-xl blur opacity-60 group-hover:opacity-80" />
               <div className="relative flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl">
                 <Download size={18} /><span className="text-sm font-medium">Export</span>
@@ -313,6 +326,15 @@ export default function ContactsPage() {
               currentUser={CURRENT_USER_ID}
             />
           }
+          <div className="bg-white border-t px-4 py-3">
+             <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+          </div>
         </div>
       </div>
 
@@ -364,7 +386,8 @@ export default function ContactsPage() {
             { key: 'name', label: 'Name', required: true },
             { key: 'email', label: 'Email' },
             { key: 'phone', label: 'Phone' },
-            { key: 'status', label: 'Status' }
+            { key: 'status', label: 'Status' },
+            { key: 'companyId', label: 'Company ID', type: 'number' }
           ]}
         />
       )}

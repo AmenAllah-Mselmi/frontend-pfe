@@ -1,15 +1,14 @@
 'use client';
 import { useState } from 'react';
 import {
-  X, User, Calendar, MessageSquare,
-  Clock, AlertCircle, CheckCircle, Send,
+  X, User, Calendar,
+  Clock, AlertCircle, CheckCircle,
   ChevronDown, Edit, Trash2
 } from 'lucide-react';
 
 export default function TicketDetailsModal({
-  ticket, onClose, onEdit, onDelete, onStatusChange, onAddComment, currentUser
+  ticket, onClose, onEdit, onDelete, onStatusChange, currentUser
 }: any) {
-  const [newComment, setNewComment] = useState('');
 
   const statusColors: any = {
     'NEW': 'bg-gray-100 text-gray-700',
@@ -23,12 +22,7 @@ export default function TicketDetailsModal({
     return new Date(dateString).toLocaleString();
   };
 
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      onAddComment(ticket.id, newComment);
-      setNewComment('');
-    }
-  };
+
 
   const canModify = ticket.createdBy === currentUser;
 
@@ -149,10 +143,6 @@ export default function TicketDetailsModal({
             </div>
           </div>
 
-          <div className="border-t pt-4">
-            <h3 className="font-semibold text-gray-700 mb-4">Comments</h3>
-            <p className="text-gray-500 text-sm">Comments feature comming soon...</p>
-          </div>
         </div>
       </div>
     </div>

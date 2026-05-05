@@ -19,9 +19,13 @@ export type Activity = {
 type ActivityState = {
     activities: Activity[];
     loading: boolean;
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    itemsPerPage: number;
     filters: any;
     setFilters: (filters: any) => void;
-    loadActivities: () => Promise<void>;
+    loadActivities: (page?: number, limit?: number) => Promise<void>;
     addActivity: (activity: Omit<Activity, "id" | "createdAt" | "updatedAt">) => Promise<void>;
     deleteActivity: (id: number) => Promise<void>;
     updateActivity: (id: number, updatedActivity: Partial<Activity>) => Promise<void>;
@@ -32,15 +36,31 @@ const base = process.env.NEXT_PUBLIC_API_URL || '';
 export const useActivityStore = create<ActivityState>((set) => ({
     activities: [],
     loading: false,
+    totalItems: 0,
+    totalPages: 0,
+    currentPage: 1,
+    itemsPerPage: 10,
     filters: {},
     setFilters: (filters) => set({ filters }),
 
-    loadActivities: async () => {
+    loadActivities: async (page = 1, limit = 10) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/activities`, { credentials: "include" });
-            const data = await response.json();
-            set({ activities: Array.isArray(data) ? data : [], loading: false });
+            const response = await fetch(`${base}/activities?page=${page}&limit=${limit}`, { credentials: "include" });
+            const result = await response.json();
+            
+            if (result.data && Array.isArray(result.data)) {
+                set({ 
+                    activities: result.data, 
+                    totalItems: result.total, 
+                    totalPages: result.totalPages,
+                    currentPage: result.page,
+                    itemsPerPage: result.limit,
+                    loading: false 
+                });
+            } else {
+                set({ activities: Array.isArray(result) ? result : [], loading: false });
+            }
         } catch (error) {
             console.error('Failed to load activities:', error);
             set({ loading: false });

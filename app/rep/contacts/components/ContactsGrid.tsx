@@ -31,7 +31,7 @@ export default function ContactsGrid({ contacts, onContactClick, onEdit, onDelet
           </div>
           
           <div className="space-y-2 mb-3 text-sm">
-            <p className="text-gray-600 flex items-center gap-1"><Building2 size={14} className="text-gray-400" />{contact.company}</p>
+            <p className="text-gray-600 flex items-center gap-1"><Building2 size={14} className="text-gray-400" />{contact.company?.name || 'N/A'}</p>
             <p className="text-gray-600 flex items-center gap-1"><Mail size={14} className="text-gray-400" />{contact.email}</p>
             <p className="text-gray-600 flex items-center gap-1"><Phone size={14} className="text-gray-400" />{contact.phone}</p>
           </div>

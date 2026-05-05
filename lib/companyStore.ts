@@ -27,7 +27,12 @@ export type Company = {
 type CompanyState = {
     companies: Company[];
     loading: boolean;
-    loadCompanies: () => Promise<void>;
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    itemsPerPage: number;
+    loadCompanies: (page?: number, limit?: number) => Promise<void>;
+    fetchAllCompanies: () => Promise<Company[]>;
     addCompany: (company: Omit<Company, "id" | "createdAt" | "updatedAt">) => Promise<void>;
     deleteCompany: (id: number) => Promise<void>;
     updateCompany: (id: number, updatedCompany: Partial<Company>) => Promise<void>;
@@ -37,14 +42,42 @@ const base = process.env.NEXT_PUBLIC_API_URL || '';
 export const useCompanyStore = create<CompanyState>((set) => ({
     companies: [],
     loading: false,
-    loadCompanies: async () => {
+    totalItems: 0,
+    totalPages: 0,
+    currentPage: 1,
+    itemsPerPage: 10,
+    loadCompanies: async (page = 1, limit = 10) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/companies`, { credentials: "include" });
-            const data = await response.json();
-            set({ companies: data, loading: false });
+            const response = await fetch(`${base}/companies?page=${page}&limit=${limit}`, { credentials: "include" });
+            const result = await response.json();
+            
+            if (result.data && Array.isArray(result.data)) {
+                set({ 
+                    companies: result.data, 
+                    totalItems: result.total, 
+                    totalPages: result.totalPages,
+                    currentPage: result.page,
+                    itemsPerPage: result.limit,
+                    loading: false 
+                });
+            } else {
+                set({ companies: result, loading: false });
+            }
         } catch (error) {
             set({ loading: false });
+        }
+    },
+    fetchAllCompanies: async () => {
+        try {
+            const response = await fetch(`${base}/companies?page=1&limit=10000`, { credentials: "include" });
+            const result = await response.json();
+            if (result.data && Array.isArray(result.data)) return result.data;
+            if (Array.isArray(result)) return result;
+            return [];
+        } catch (error) {
+            console.error("Error fetching all companies:", error);
+            return [];
         }
     },
     addCompany: async (company) => {

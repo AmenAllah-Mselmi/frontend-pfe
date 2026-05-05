@@ -21,6 +21,7 @@ import EditTicketModal from './components/EditTicketModal';
 import DeleteTicketModal from './components/DeleteTicketModal';
 import TicketDetailsModal from './components/TicketDetailsModal';
 import TicketsFilters from './components/TicketsFilters';
+import Pagination from '@/components/Pagination';
 
 const CURRENT_USER = 'Alex Morgan';
 
@@ -38,18 +39,20 @@ export default function RepresentativeTicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<any>({});
-  const { tickets, loadTickets, addTicket, updateTicket, deleteTicket } = useTicketStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { tickets, totalItems, loadTickets, addTicket, updateTicket, deleteTicket } = useTicketStore();
   const { leads, loadLeads } = useLeadStore();
   const { contacts, loadContacts } = useContactStore();
   const { users, loadUsers } = useUserStore();
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
 
   useEffect(() => {
-    loadTickets();
-    loadLeads();
-    loadContacts();
+    loadTickets(currentPage, itemsPerPage);
+    loadLeads(1, 1000);
+    loadContacts(1, 1000);
     loadUsers();
-  }, [loadTickets, loadLeads, loadContacts, loadUsers]);
+  }, [loadTickets, loadLeads, loadContacts, loadUsers, currentPage, itemsPerPage]);
 
   // Apply filters and search
   useEffect(() => {
@@ -331,6 +334,16 @@ export default function RepresentativeTicketsPage() {
               currentUser={CURRENT_USER}
             />
           )}
+          <div className="bg-white border-t px-4 py-3">
+             <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                accentColor="emerald"
+              />
+          </div>
         </div>
       </div>
 

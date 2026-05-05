@@ -42,7 +42,7 @@ export default function PipelineList({ deals = [], onEdit, onDelete }: any) {
                 <p className="font-medium">{deal.name ?? 'Untitled'}</p>
                 <p className="text-xs text-gray-500">{deal.contact?.name ?? '-'}</p>
               </td>
-              <td className="px-6 py-4 text-sm">{deal.company}</td>
+              <td className="px-6 py-4 text-sm">{deal.company || 'N/A'}</td>
               <td className="px-6 py-4 font-semibold">{(deal.value != null && !isNaN(Number(deal.value)) ? Number(deal.value).toLocaleString() : '0')}€</td>
               <td className="px-6 py-4">
                 <span className={`px-2 py-1 text-xs rounded-full ${getStageColor(deal.stage)}`}>

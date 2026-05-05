@@ -15,7 +15,7 @@ export default function DealDetailModal({ deal, onClose, onEdit, onDelete }: any
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="text-xl font-bold text-gray-900 truncate">{deal.name}</h2>
-                <p className="text-sm text-gray-500 truncate">{deal.company}</p>
+                <p className="text-sm text-gray-500 truncate">{deal.company?.name || 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 ml-auto">

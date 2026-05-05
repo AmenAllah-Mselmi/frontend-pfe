@@ -1,6 +1,10 @@
 'use client';
-import { useState } from 'react';
+
 import { X, User, Mail, Phone, DollarSign, Tag } from 'lucide-react';
+import { useForm } from '@/lib/hooks/useForm';
+import { validators } from '@/lib/utils/validation';
+import FormField from '@/components/Form/FormField';
+import CompanySelector from '@/components/Form/CompanySelector';
 
 interface LeadFormModalProps {
   onClose: () => void;
@@ -8,19 +12,24 @@ interface LeadFormModalProps {
 }
 
 export default function LeadFormModal({ onClose, onSave }: LeadFormModalProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    dealValue: 0,
-    status: 'NEW',
-    probability: 20
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useForm({
+    initialValues: {
+      name: '',
+      email: '',
+      phone: '',
+      dealValue: 0,
+      status: 'NEW',
+      probability: 20,
+      companyId: undefined as number | undefined
+    },
+    validationSchema: {
+      name: [validators.required, validators.minLength(2)],
+      email: [validators.required, validators.email],
+      dealValue: [validators.minValue(0)],
+      phone: [validators.phone]
+    },
+    onSubmit: (data) => onSave(data)
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
 
   // Fonction pour gérer le clic en dehors du modal
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -31,116 +40,138 @@ export default function LeadFormModal({ onClose, onSave }: LeadFormModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
-        <div className="p-6 border-b border-gray-200">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-900">Create New Lead</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition"
+              className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition"
               type="button"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X size={20} />
             </button>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Contact Person <span className="text-red-500">*</span></label>
-            <div className="relative">
-              <User size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
+          <FormField
+            label="Contact Person"
+            name="name"
+            error={errors.name}
+            touched={touched.name}
+            icon={User}
+            required
+          >
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={values.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              onBlur={() => handleBlur('name')}
+            />
+          </FormField>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField
+              label="Email"
+              name="email"
+              error={errors.email}
+              touched={touched.email}
+              icon={Mail}
+              required
+            >
               <input
-                type="text"
-                required
-                placeholder="Full Name"
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                type="email"
+                placeholder="email@example.com"
+                value={values.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                onBlur={() => handleBlur('email')}
               />
-            </div>
+            </FormField>
+
+            <FormField
+              label="Phone"
+              name="phone"
+              error={errors.phone}
+              touched={touched.phone}
+              icon={Phone}
+            >
+              <input
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                value={values.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                onBlur={() => handleBlur('phone')}
+              />
+            </FormField>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Email</label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
-                <input
-                  type="email"
-                  placeholder="email@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Phone</label>
-              <div className="relative">
-                <Phone size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
-                <input
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
+            <FormField
+              label="Deal Value (€)"
+              name="dealValue"
+              error={errors.dealValue}
+              touched={touched.dealValue}
+              icon={DollarSign}
+            >
+              <input
+                type="number"
+                placeholder="0"
+                value={values.dealValue}
+                onChange={(e) => handleChange('dealValue', Number(e.target.value))}
+                onBlur={() => handleBlur('dealValue')}
+              />
+            </FormField>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Deal Value (€)</label>
-              <div className="relative">
-                <DollarSign size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
-                <input
-                  type="number"
-                  placeholder="0"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition"
-                  value={formData.dealValue}
-                  onChange={(e) => setFormData({ ...formData, dealValue: Number(e.target.value) })}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Status</label>
-              <div className="relative">
-                <Tag size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
-                <select
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition appearance-none"
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                >
-                  <option value="NEW">New</option>
-                  <option value="CONTACTED">Contacted</option>
-                  <option value="QUALIFIED">Qualified</option>
-                  <option value="LOST">Lost</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Probability (%)</label>
+            <FormField
+              label="Status"
+              name="status"
+              error={errors.status}
+              touched={touched.status}
+              icon={Tag}
+            >
               <select
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition"
-                value={formData.probability}
-                onChange={(e) => setFormData({ ...formData, probability: Number(e.target.value) })}
+                value={values.status}
+                onChange={(e) => handleChange('status', e.target.value)}
+                onBlur={() => handleBlur('status')}
+                className="appearance-none"
               >
-                {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(p => (
-                  <option key={p} value={p}>{p}%</option>
-                ))}
+                <option value="NEW">New</option>
+                <option value="CONTACTED">Contacted</option>
+                <option value="QUALIFIED">Qualified</option>
+                <option value="LOST">Lost</option>
               </select>
-            </div>
+            </FormField>
           </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Company (Optional)</label>
+            <CompanySelector
+              value={values.companyId}
+              onChange={(id) => handleChange('companyId', id)}
+            />
+          </div>
+
+          <FormField
+            label="Probability (%)"
+            name="probability"
+            error={errors.probability}
+            touched={touched.probability}
+          >
+            <select
+              value={values.probability}
+              onChange={(e) => handleChange('probability', Number(e.target.value))}
+              onBlur={() => handleBlur('probability')}
+            >
+              {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(p => (
+                <option key={p} value={p}>{p}%</option>
+              ))}
+            </select>
+          </FormField>
 
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-2">
             <button
@@ -152,13 +183,14 @@ export default function LeadFormModal({ onClose, onSave }: LeadFormModalProps) {
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-500/20"
+              disabled={isSubmitting}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 disabled:opacity-50"
             >
-              Create Lead
+              {isSubmitting ? 'Creating...' : 'Create Lead'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
+}

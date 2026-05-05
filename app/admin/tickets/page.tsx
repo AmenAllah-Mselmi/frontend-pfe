@@ -23,6 +23,7 @@ import EditTicketModal from './components/EditTicketModal';
 import DeleteTicketModal from './components/DeleteTicketModal';
 import TicketDetailsModal from './components/TicketDetailsModal';
 import TicketsFilters from './components/TicketsFilters';
+import Pagination from '@/components/Pagination';
 import { useTicketStore } from '@/lib/ticketStore';
 import { useLeadStore } from '@/lib/leadStore';
 import { useContactStore } from '@/lib/contactStore';
@@ -40,24 +41,26 @@ export default function TicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<any>({});
-  const { tickets, loadTickets, addTicket, updateTicket, deleteTicket } = useTicketStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { tickets, totalItems, loadTickets, addTicket, updateTicket, deleteTicket } = useTicketStore();
   const { leads, loadLeads } = useLeadStore();
   const { contacts, loadContacts } = useContactStore();
   const { users, loadUsers } = useUserStore();
   const [filteredTickets, setFilteredTickets] = useState<any[]>([]);
 
   useEffect(() => {
-    loadTickets();
-    loadLeads();
-    loadContacts();
+    loadTickets(currentPage, itemsPerPage);
+    loadLeads(1, 1000);
+    loadContacts(1, 1000);
     loadUsers();
-  }, [loadTickets, loadLeads, loadContacts, loadUsers]);
+  }, [loadTickets, loadLeads, loadContacts, loadUsers, currentPage, itemsPerPage]);
 
   // Apply filters and search
   useEffect(() => {
     let filtered = [...tickets].map((t: any) => ({
       ...t,
-      priority: 'medium',
+      priority: 'MEDIUM',
       tags: ['support'],
       assignedTo: 'Admin',
       leadName: leads.find(l => l.id === t.leadId)?.name || '-',
@@ -189,7 +192,7 @@ export default function TicketsPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Tickets</p>
-            <p className="text-2xl font-bold text-gray-900">{tickets.length}</p>
+            <p className="text-2xl font-bold text-gray-900">{totalItems}</p>
           </div>
           <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Open</p>
@@ -366,6 +369,15 @@ export default function TicketsPage() {
               onStatusChange={handleStatusChange}
             />
           )}
+          <div className="bg-white border-t px-4 py-3">
+             <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+          </div>
         </div>
       </div>
 

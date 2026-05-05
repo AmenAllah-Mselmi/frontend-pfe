@@ -17,9 +17,12 @@ import ActivitiesFeed from './components/ActivitiesFeed';
 import CreateActivityModal from './components/CreateActivityModal';
 import ActivityDetailsModal from './components/ActivityDetailsModal';
 import ActivitiesFilters from './components/ActivitiesFilters';
+import Pagination from '@/components/Pagination';
 
 export default function ActivitiesPage() {
-  const { activities, loading, loadActivities, addActivity } = useActivityStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { activities, totalItems, loading, loadActivities, addActivity } = useActivityStore();
   const { user } = useAuthStore();
 
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
@@ -195,10 +198,22 @@ export default function ActivitiesPage() {
               <p className="text-gray-500">Loading activities...</p>
             </div>
           ) : (
-            <ActivitiesFeed
-              activities={filteredActivities}
-              onActivityClick={handleActivityClick}
-            />
+            <>
+              <ActivitiesFeed
+                activities={filteredActivities}
+                onActivityClick={handleActivityClick}
+              />
+              <div className="bg-white border-t px-4 py-3">
+                 <Pagination
+                    currentPage={currentPage}
+                    totalItems={totalItems}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                    accentColor="emerald"
+                  />
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -81,6 +81,9 @@ export default function LeadTable({ data, selectedRows, setSelectedRows, onLeadC
                 Value {sortField === 'dealValue' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
               <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700" onClick={() => setSortField('probability')}>
+                AI Score
+              </th>
               <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Probability</th>
               <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -108,6 +111,11 @@ export default function LeadTable({ data, selectedRows, setSelectedRows, onLeadC
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{lead.name}</p>
+                      {lead.company && (
+                        <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                          <Building2 size={10} /> {lead.company.name}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -124,6 +132,18 @@ export default function LeadTable({ data, selectedRows, setSelectedRows, onLeadC
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[lead.status]}`}>
                     {lead.status}
                   </span>
+                </td>
+                <td className="p-4">
+                  {(lead as any).leadScore ? (
+                    <div className="flex items-center gap-1">
+                      <span className="font-bold text-indigo-600">{(lead as any).leadScore.score}</span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${(lead as any).leadScore.temperature === 'Hot' ? 'bg-red-100 text-red-700' : (lead as any).leadScore.temperature === 'Warm' ? 'bg-yellow-100 text-yellow-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                        {(lead as any).leadScore.temperature}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-400">N/A</span>
+                  )}
                 </td>
                 <td className="p-4">
                   <span className="text-sm font-semibold">{lead.probability || 0}%</span>

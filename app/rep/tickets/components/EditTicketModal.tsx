@@ -1,6 +1,9 @@
 'use client';
-import { useState } from 'react';
+
 import { X, Tag, AlertCircle } from 'lucide-react';
+import { useForm } from '@/lib/hooks/useForm';
+import { validators } from '@/lib/utils/validation';
+import FormField from '@/components/Form/FormField';
 
 interface EditTicketModalProps {
   ticket: any;
@@ -12,25 +15,28 @@ interface EditTicketModalProps {
 }
 
 export default function EditTicketModal({ ticket, onClose, onSave, currentUser, leads, contacts }: EditTicketModalProps) {
-  const [formData, setFormData] = useState({
-    title: ticket.title || '',
-    description: ticket.description || '',
-    leadId: ticket.leadId || '',
-    contactId: ticket.contactId || '',
-    priority: ticket.priority || 'MEDIUM'
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useForm({
+    initialValues: {
+      title: ticket.title || '',
+      description: ticket.description || '',
+      leadId: ticket.leadId || '',
+      contactId: ticket.contactId || '',
+      priority: ticket.priority || 'MEDIUM'
+    },
+    validationSchema: {
+      title: [validators.required, validators.minLength(5)],
+      leadId: [validators.required],
+      contactId: [validators.required]
+    },
+    onSubmit: (data) => {
+      onSave(ticket.id, {
+        ...data,
+        leadId: Number(data.leadId),
+        contactId: Number(data.contactId),
+        userId: ticket.userId
+      });
+    }
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(ticket.id, {
-      title: formData.title,
-      description: formData.description,
-      leadId: Number(formData.leadId),
-      contactId: Number(formData.contactId),
-      userId: ticket.userId,
-      priority: formData.priority
-    });
-  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
@@ -39,13 +45,18 @@ export default function EditTicketModal({ ticket, onClose, onSave, currentUser, 
   // Vérifier si l'utilisateur peut éditer
   if (ticket.createdBy !== currentUser) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleBackdropClick}>
-        <div className="bg-white rounded-xl w-full max-w-md mx-4 p-6">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleBackdropClick}>
+        <div className="bg-white rounded-2xl w-full max-w-md mx-auto p-8 shadow-2xl overflow-hidden">
           <div className="text-center">
-            <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Permission Denied</h3>
-            <p className="text-sm text-gray-600 mb-4">You can only edit tickets that you created.</p>
-            <button onClick={onClose} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle size={32} className="text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Permission Denied</h3>
+            <p className="text-gray-600 mb-6">You can only edit tickets that you created or are assigned to you.</p>
+            <button 
+              onClick={onClose} 
+              className="w-full px-6 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold"
+            >
               Close
             </button>
           </div>
@@ -55,95 +66,119 @@ export default function EditTicketModal({ ticket, onClose, onSave, currentUser, 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={handleBackdropClick}>
-      <div className="bg-white rounded-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b sticky top-0 bg-white">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Edit Ticket #{ticket.id}</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <X size={20} />
-            </button>
-          </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleBackdropClick}>
+      <div className="bg-white rounded-2xl w-full max-w-2xl mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
+          <h2 className="text-xl font-semibold text-gray-800">Edit Ticket #{ticket.id}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+            <X size={20} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <FormField
+            label="Ticket Title"
+            name="title"
+            error={errors.title}
+            touched={touched.title}
+            icon={AlertCircle}
+            required
+          >
             <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-              required
+              placeholder="e.g. Server issues in production"
+              value={values.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              onBlur={() => handleBlur('title')}
             />
-          </div>
+          </FormField>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <FormField
+            label="Description"
+            name="description"
+            error={errors.description}
+            touched={touched.description}
+          >
             <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Provide more details about the issue..."
               rows={4}
-              className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              value={values.description}
+              onChange={(e) => handleChange('description', e.target.value)}
+              onBlur={() => handleBlur('description')}
+              className="resize-none"
             />
-          </div>
+          </FormField>
 
-          {/* Priority */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+          <FormField
+            label="Priority"
+            name="priority"
+            icon={Tag}
+          >
             <select
-              value={formData.priority}
-              onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-              className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              value={values.priority}
+              onChange={(e) => handleChange('priority', e.target.value)}
+              className="appearance-none"
             >
               <option value="LOW">Low</option>
               <option value="MEDIUM">Medium</option>
               <option value="HIGH">High</option>
               <option value="CRITICAL">Critical</option>
             </select>
-          </div>
+          </FormField>
 
-          {/* Deal/Contact associations */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Associated Lead</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField
+              label="Associated Lead"
+              name="leadId"
+              error={errors.leadId}
+              touched={touched.leadId}
+              required
+            >
               <select
-                value={formData.leadId}
-                onChange={(e) => setFormData({ ...formData, leadId: e.target.value })}
-                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                required
+                value={values.leadId}
+                onChange={(e) => handleChange('leadId', e.target.value)}
+                onBlur={() => handleBlur('leadId')}
               >
-                <option value="" disabled>Select a lead...</option>
+                <option value="">Select a lead...</option>
                 {leads?.map((lead: any) => (
                   <option key={lead.id} value={lead.id}>{lead.name}</option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Associated Contact</label>
+            </FormField>
+
+            <FormField
+              label="Associated Contact"
+              name="contactId"
+              error={errors.contactId}
+              touched={touched.contactId}
+              required
+            >
               <select
-                value={formData.contactId}
-                onChange={(e) => setFormData({ ...formData, contactId: e.target.value })}
-                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                required
+                value={values.contactId}
+                onChange={(e) => handleChange('contactId', e.target.value)}
+                onBlur={() => handleBlur('contactId')}
               >
-                <option value="" disabled>Select a contact...</option>
+                <option value="">Select a contact...</option>
                 {contacts?.map((contact: any) => (
                   <option key={contact.id} value={contact.id}>{contact.name}</option>
                 ))}
               </select>
-            </div>
+            </FormField>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium"
+            >
               Cancel
             </button>
-            <button type="submit" className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-700">
-              Save Changes
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-2.5 bg-emerald-600 text-white text-sm rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 font-semibold"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

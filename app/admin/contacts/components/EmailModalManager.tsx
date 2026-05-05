@@ -46,8 +46,8 @@ export default function EmailModalManager({ onClose, onSend, contact, onSchedule
   const applyTemplate = (template: any) => {
     setEmailData({
       ...emailData,
-      subject: template.subject.replace('{company}', contact.company).replace('{name}', contact.name),
-      message: template.body.replace('{company}', contact.company).replace('{name}', contact.name)
+      subject: template.subject.replace('{company}', contact.company?.name || 'N/A').replace('{name}', contact.name),
+      message: template.body.replace('{company}', contact.company?.name || 'N/A').replace('{name}', contact.name)
     });
   };
 
@@ -82,7 +82,7 @@ export default function EmailModalManager({ onClose, onSend, contact, onSchedule
             </div>
             <div>
               <h2 className="text-xl font-semibold">Compose Email</h2>
-              <p className="text-sm text-gray-500">To: {contact.name} • {contact.company}</p>
+              <p className="text-sm text-gray-500">To: {contact.name} • {contact.company?.name || 'N/A'}</p>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">

@@ -32,7 +32,7 @@ export default function DeleteContactModal({ contact, onClose, onConfirm }: any)
             </div>
             <div>
               <p className="font-medium text-gray-900">{contact.name}</p>
-              <p className="text-xs text-gray-500">{contact.company} • {contact.position}</p>
+              <p className="text-xs text-gray-500">{contact.company?.name || 'N/A'} • {contact.position}</p>
             </div>
           </div>
           

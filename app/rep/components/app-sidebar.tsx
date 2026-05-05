@@ -64,7 +64,8 @@ export default function RepresentativeSidebar({
     { title: 'Activities', icon: Calendar, path: '/rep/activities' },
     { title: 'Companies', icon: Building2, path: '/rep/companies' },
     { title: 'Contacts', icon: Settings, path: '/rep/contacts' },
-    { title: 'Tickets', icon: Ticket, path: '/rep/tickets' }
+    { title: 'Tickets', icon: Ticket, path: '/rep/tickets' },
+    { title: 'Analytics', icon: BarChart3, path: '/rep/analytics' }
   ];
 
 

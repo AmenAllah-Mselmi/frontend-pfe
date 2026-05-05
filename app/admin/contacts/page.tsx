@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { Search, Plus, Filter, Users, UserPlus, Upload, Mail, Phone, Building2, Star, Download } from 'lucide-react';
 import ContactsTable from './components/ContactsTable';
 import ContactsGrid from './components/ContactsGrid';
@@ -11,6 +12,7 @@ import ContactsFilters from './components/ContactsFilters';
 import ContactsStats from './components/ContactsStats';
 import ContactDetailsModal from './components/ContactDetailsModal';
 import EmailModalManager from './components/EmailModalManager';
+import Pagination from '@/components/Pagination';
 
 import { useContactStore } from '@/lib/contactStore';
 import { useAuthStore } from '@/lib/authStore';
@@ -30,7 +32,9 @@ export default function ContactsPage() {
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<any>({});
-  const { contacts, loadContacts, addContact, updateContact, deleteContact } = useContactStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { contacts, totalItems, loadContacts, addContact, updateContact, deleteContact } = useContactStore();
   const { user } = useAuthStore();
   const [companies, setCompanies] = useState<any[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<any[]>([]);
@@ -39,13 +43,13 @@ export default function ContactsPage() {
   const { emails ,loadEmails,sendEmail} = useEmailStore();
   // Fetch Companies on Mount
   useEffect(() => {
-    loadContacts();
+    loadContacts(currentPage, itemsPerPage);
     const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/companies`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setCompanies(data); })
       .catch(() => { });
-  }, [loadContacts]);
+  }, [loadContacts, currentPage, itemsPerPage]);
 
   // Appliquer les filtres et la recherche
   useEffect(() => {
@@ -142,9 +146,8 @@ export default function ContactsPage() {
   };
 
   const handleSendEmail = async (emailData: any) => {
-    if (!user) return alert('You must be logged in to send emails');
+    if (!user) return toast.error('You must be logged in to send emails');
     try {
-        alert('Email sent successfully');
       await sendEmail({
         from: user.email,
         to: selectedForEmail?.email || '',
@@ -154,10 +157,11 @@ export default function ContactsPage() {
         contactId: selectedForEmail?.id,
         leadId: selectedForEmail?.leadId
       });
+      toast.success('Email sent successfully');
       setShowEmail(false);
     } catch (err) {
       console.error('Failed to send email', err);
-      alert('Failed to send email. Please check console.');
+      toast.error('Failed to send email. Please check console.');
     }
   };
 
@@ -183,7 +187,14 @@ export default function ContactsPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <button onClick={() => exportToCSV(filteredContacts, 'admin_contacts')} className="flex-1 sm:flex-none relative group">
+            <button onClick={async () => {
+              const allContacts = await useContactStore.getState().fetchAllContacts();
+              const exportData = allContacts.map(c => ({
+                ...c,
+                companyName: c.company?.name || 'N/A'
+              }));
+              exportToCSV(exportData, 'admin_contacts');
+            }} className="flex-1 sm:flex-none relative group">
               <div className="absolute inset-0 bg-purple-600 rounded-xl blur opacity-60 group-hover:opacity-80" />
               <div className="relative flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl">
                 <Download size={18} /><span className="text-sm font-medium">Export</span>
@@ -321,6 +332,15 @@ export default function ContactsPage() {
               onDelete={handleDeleteContact}
             />
           }
+          <div className="bg-white border-t px-4 py-3">
+             <Pagination
+                currentPage={currentPage}
+                totalItems={totalItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+              />
+          </div>
         </div>
       </div>
 
@@ -370,7 +390,8 @@ export default function ContactsPage() {
             { key: 'name', label: 'Name', required: true },
             { key: 'email', label: 'Email' },
             { key: 'phone', label: 'Phone' },
-            { key: 'status', label: 'Status' }
+            { key: 'status', label: 'Status' },
+            { key: 'companyId', label: 'Company ID', type: 'number' }
           ]}
         />
       )}

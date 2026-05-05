@@ -132,7 +132,10 @@ export default function CompaniesPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => exportToCSV(filteredCompanies, 'rep_companies')} className="relative group">
+            <button onClick={async () => {
+              const allCompanies = await useCompanyStore.getState().fetchAllCompanies();
+              exportToCSV(allCompanies, 'rep_companies');
+            }} className="relative group">
               <div className="absolute inset-0 bg-purple-600 rounded-xl blur opacity-60 group-hover:opacity-80" />
               <div className="relative flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl">
                 <Download size={18} /><span className="text-sm font-medium">Export</span>

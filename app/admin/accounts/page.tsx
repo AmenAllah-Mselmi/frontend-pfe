@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Users,
   UserPlus,
@@ -16,9 +17,10 @@ import RepresentativeDetailsModal from './components/RepresentativeDetailsModal'
 import RepresentativesFilters from './components/RepresentativesFilters';
 import RepresentativesStats from './components/RepresentativesStats';
 
+import { Suspense } from 'react';
 import { useUserStore, User } from '@/lib/userStore';
 
-export default function RepresentativesPage() {
+function RepresentativesContent() {
   const [view, setView] = useState<'table' | 'grid'>('table');
   const [showFilters, setShowFilters] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -29,6 +31,15 @@ export default function RepresentativesPage() {
   const [selectedRep, setSelectedRep] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<any>({});
+ 
+  const searchParams = useSearchParams();
+  const action = searchParams.get('action');
+ 
+  useEffect(() => {
+    if (action === 'add') {
+      setShowCreate(true);
+    }
+  }, [action]);
 
   const { users, loadUsers, addUser, updateUser, deleteUser } = useUserStore();
 
@@ -290,5 +301,17 @@ export default function RepresentativesPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function RepresentativesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <RepresentativesContent />
+    </Suspense>
   );
 }

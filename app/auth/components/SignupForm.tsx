@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { User, Mail, Lock, Eye, EyeOff, Building } from 'lucide-react';
-import toast from 'react-hot-toast';
 import SocialAuth from './SocialAuth';
 import AuthDivider from './AuthDivider';
+import { useAuthStore } from '@/lib/authStore';
+import { useForm } from '@/lib/hooks/useForm';
+import { validators } from '@/lib/utils/validation';
+import FormField from '@/components/Form/FormField';
 
 interface SignupFormProps {
   onSubmit: (data: any) => void;
@@ -12,206 +15,199 @@ interface SignupFormProps {
 }
 
 const SignupForm = ({ onSubmit, isLoading }: SignupFormProps) => {
+  const { error: serverError } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    company: '',
-    password: '',
-    confirmPassword: '',
-    acceptTerms: false,
-    newsletter: true
+
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useForm({
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      company: '',
+      password: '',
+      confirmPassword: '',
+      acceptTerms: false,
+      newsletter: true
+    },
+    validationSchema: {
+      firstName: [validators.required, validators.minLength(2)],
+      lastName: [validators.required, validators.minLength(2)],
+      email: [validators.required, validators.email],
+      password: [validators.required, validators.password],
+      confirmPassword: [
+        validators.required,
+        validators.matches('password', "Les mots de passe ne correspondent pas")
+      ],
+      acceptTerms: [validators.required]
+    },
+    onSubmit: (data) => onSubmit(data)
   });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas");
-      return;
-    }
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-      toast.error("Le mot de passe doit contenir au moins 8 caractères avec un chiffre et une majuscule.");
-      return;
-    }
-    if (!formData.acceptTerms) {
-      toast.error("Veuillez accepter les conditions d'utilisation");
-      return;
-    }
-    onSubmit(formData);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
 
   return (
     <div className="space-y-6">
-      {/* Social Auth */}
-      {/* <SocialAuth /> */}
-
       <AuthDivider />
+
+      {/* Global Error */}
+      {serverError && (
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm animate-shake">
+          {serverError}
+        </div>
+      )}
 
       {/* Formulaire */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Nom et Prénom */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Prénom
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                name="firstName"
-                required
-                value={formData.firstName}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF375E]/20 focus:border-[#FF375E] transition-colors"
-                placeholder="Votre prénom"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nom
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                name="lastName"
-                required
-                value={formData.lastName}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF375E]/20 focus:border-[#FF375E] transition-colors"
-                placeholder="Votre nom"
-              />
-            </div>
-          </div>
+          <FormField
+            label="Prénom"
+            name="firstName"
+            error={errors.firstName}
+            touched={touched.firstName}
+            icon={User}
+            required
+          >
+            <input
+              type="text"
+              placeholder="Votre prénom"
+              value={values.firstName}
+              onChange={(e) => handleChange('firstName', e.target.value)}
+              onBlur={() => handleBlur('firstName')}
+            />
+          </FormField>
+
+          <FormField
+            label="Nom"
+            name="lastName"
+            error={errors.lastName}
+            touched={touched.lastName}
+            icon={User}
+            required
+          >
+            <input
+              type="text"
+              placeholder="Votre nom"
+              value={values.lastName}
+              onChange={(e) => handleChange('lastName', e.target.value)}
+              onBlur={() => handleBlur('lastName')}
+            />
+          </FormField>
         </div>
 
         {/* Email */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Adresse email professionnelle
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF375E]/20 focus:border-[#FF375E] transition-colors"
-              placeholder="nom@entreprise.com"
-            />
-          </div>
-        </div>
+        <FormField
+          label="Adresse email professionnelle"
+          name="email"
+          error={errors.email}
+          touched={touched.email}
+          icon={Mail}
+          required
+        >
+          <input
+            type="email"
+            placeholder="nom@entreprise.com"
+            value={values.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            onBlur={() => handleBlur('email')}
+          />
+        </FormField>
 
         {/* Company */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Entreprise
-          </label>
-          <div className="relative">
-            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              name="company"
-              value={formData.company}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF375E]/20 focus:border-[#FF375E] transition-colors"
-              placeholder="Nom de votre entreprise (optionnel)"
-            />
-          </div>
-        </div>
+        <FormField
+          label="Entreprise"
+          name="company"
+          error={errors.company}
+          touched={touched.company}
+          icon={Building}
+        >
+          <input
+            type="text"
+            placeholder="Nom de votre entreprise (optionnel)"
+            value={values.company}
+            onChange={(e) => handleChange('company', e.target.value)}
+            onBlur={() => handleBlur('company')}
+          />
+        </FormField>
 
         {/* Password */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Mot de passe
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <div className="relative">
+          <FormField
+            label="Mot de passe"
+            name="password"
+            error={errors.password}
+            touched={touched.password}
+            icon={Lock}
+            required
+          >
             <input
               type={showPassword ? "text" : "password"}
-              name="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF375E]/20 focus:border-[#FF375E] transition-colors"
               placeholder="Minimum 8 caractères"
+              value={values.password}
+              onChange={(e) => handleChange('password', e.target.value)}
+              onBlur={() => handleBlur('password')}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
-            >
-              {showPassword ? (
-                <EyeOff className="w-5 h-5 text-gray-400" />
-              ) : (
-                <Eye className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
-          </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Doit contenir au moins 8 caractères avec un chiffre et une majuscule.
-          </p>
+          </FormField>
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-[34px] p-2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
 
         {/* Confirm Password */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Confirmer le mot de passe
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type={showPassword ? "text" : "password"}
-              name="confirmPassword"
-              required
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF375E]/20 focus:border-[#FF375E] transition-colors"
-              placeholder="Retapez votre mot de passe"
-            />
-          </div>
-        </div>
+        <FormField
+          label="Confirmer le mot de passe"
+          name="confirmPassword"
+          error={errors.confirmPassword}
+          touched={touched.confirmPassword}
+          icon={Lock}
+          required
+        >
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Retapez votre mot de passe"
+            value={values.confirmPassword}
+            onChange={(e) => handleChange('confirmPassword', e.target.value)}
+            onBlur={() => handleBlur('confirmPassword')}
+          />
+        </FormField>
 
         {/* Checkboxes */}
-        <div className="space-y-3">
-          <div className="flex items-start">
-            <input
-              type="checkbox"
-              name="acceptTerms"
-              checked={formData.acceptTerms}
-              onChange={handleChange}
-              className="h-4 w-4 text-[#FF375E] focus:ring-[#FF375E] border-gray-300 rounded mt-1"
-            />
-            <label className="ml-2 text-sm text-gray-700">
-              J&apos;accepte les{' '}
-              <a href="/terms" className="text-[#FF375E] hover:underline">Conditions d&apos;utilisation</a>{' '}
-              et la{' '}
-              <a href="/privacy" className="text-[#FF375E] hover:underline">Politique de confidentialité</a>
-            </label>
+        <div className="space-y-3 pt-2">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-start">
+              <input
+                type="checkbox"
+                id="acceptTerms"
+                checked={values.acceptTerms}
+                onChange={(e) => handleChange('acceptTerms', e.target.checked)}
+                onBlur={() => handleBlur('acceptTerms')}
+                className={`h-4 w-4 text-[#FF375E] focus:ring-[#FF375E] border-gray-300 rounded mt-1 transition-all ${touched.acceptTerms && errors.acceptTerms ? 'border-red-500 ring-1 ring-red-500' : values.acceptTerms ? 'border-emerald-500 ring-1 ring-emerald-500' : ''}`}
+              />
+              <label htmlFor="acceptTerms" className="ml-2 text-sm text-gray-700">
+                J&apos;accepte les{' '}
+                <a href="/terms" className="text-[#FF375E] hover:underline">Conditions d&apos;utilisation</a>{' '}
+                et la{' '}
+                <a href="/privacy" className="text-[#FF375E] hover:underline">Politique de confidentialité</a>
+              </label>
+            </div>
+            {touched.acceptTerms && errors.acceptTerms && (
+              <p className="text-red-500 text-[10px] font-medium ml-6 animate-in fade-in slide-in-from-top-1">
+                {errors.acceptTerms}
+              </p>
+            )}
           </div>
+
           <div className="flex items-start">
             <input
               type="checkbox"
-              name="newsletter"
-              checked={formData.newsletter}
-              onChange={handleChange}
+              id="newsletter"
+              checked={values.newsletter}
+              onChange={(e) => handleChange('newsletter', e.target.checked)}
               className="h-4 w-4 text-[#FF375E] focus:ring-[#FF375E] border-gray-300 rounded mt-1"
             />
-            <label className="ml-2 text-sm text-gray-700">
+            <label htmlFor="newsletter" className="ml-2 text-sm text-gray-700">
               Je souhaite recevoir des conseils, astuces et offres par email
             </label>
           </div>
@@ -220,10 +216,10 @@ const SignupForm = ({ onSubmit, isLoading }: SignupFormProps) => {
         {/* Submit */}
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full py-3 bg-linear-to-r from-[#FF375E] to-[#FF5E5E] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          disabled={isLoading || isSubmitting}
+          className="w-full py-3 bg-gradient-to-r from-[#FF375E] to-[#FF5E5E] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:-translate-y-0.5 active:translate-y-0"
         >
-          {isLoading ? (
+          {isLoading || isSubmitting ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
               Création du compte...
@@ -235,9 +231,9 @@ const SignupForm = ({ onSubmit, isLoading }: SignupFormProps) => {
       </form>
 
       {/* Offer note */}
-      <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+      <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 transition-all hover:bg-blue-100">
         <p className="text-sm text-gray-700">
-          <span className="font-semibold">14 jours gratuits</span> - 
+          <span className="font-semibold text-blue-800">14 jours gratuits</span> - 
           Testez toutes les fonctionnalités premium sans engagement
         </p>
       </div>
@@ -246,3 +242,4 @@ const SignupForm = ({ onSubmit, isLoading }: SignupFormProps) => {
 };
 
 export default SignupForm;
+SignupForm;

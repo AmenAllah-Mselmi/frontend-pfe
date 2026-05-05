@@ -1,5 +1,9 @@
 'use client';
-import { useState } from 'react';
+
+import { X, Building2, MapPin, Phone, Mail, DollarSign, Briefcase, User } from 'lucide-react';
+import { useForm } from '@/lib/hooks/useForm';
+import { validators } from '@/lib/utils/validation';
+import FormField from '@/components/Form/FormField';
 
 interface CompanyFormModalProps {
   onClose: () => void;
@@ -7,54 +11,65 @@ interface CompanyFormModalProps {
 }
 
 export default function CompanyFormModal({ onClose, onSave }: CompanyFormModalProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    companyIndustry: 'TECHNOLOGY',
-    companySize: 'SMALL',
-    location: '',
-    phone: '',
-    email: '',
-    revenue: 0
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting } = useForm({
+    initialValues: {
+      name: '',
+      companyIndustry: 'TECHNOLOGY',
+      companySize: 'SMALL',
+      location: '',
+      phone: '',
+      email: '',
+      revenue: 0
+    },
+    validationSchema: {
+      name: [validators.required, validators.minLength(2)],
+      email: [validators.required, validators.email],
+      revenue: [validators.minValue(0)],
+      phone: [validators.phone],
+      location: [validators.minLength(2)]
+    },
+    onSubmit: (data) => onSave(data)
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Create New Company</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+          <h2 className="text-xl font-semibold text-gray-900">Create New Company</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+            <X size={20} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <FormField
+            label="Company Name"
+            name="name"
+            error={errors.name}
+            touched={touched.name}
+            icon={Building2}
+            required
+          >
             <input
               type="text"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g. Acme Corp"
+              value={values.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              onBlur={() => handleBlur('name')}
             />
-          </div>
+          </FormField>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField
+              label="Industry"
+              name="companyIndustry"
+              icon={Briefcase}
+            >
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.companyIndustry}
-                onChange={(e) => setFormData({ ...formData, companyIndustry: e.target.value })}
+                value={values.companyIndustry}
+                onChange={(e) => handleChange('companyIndustry', e.target.value)}
+                onBlur={() => handleBlur('companyIndustry')}
+                className="appearance-none"
               >
                 <option value="TECHNOLOGY">Technology</option>
                 <option value="HEALTHCARE">Healthcare</option>
@@ -62,79 +77,111 @@ export default function CompanyFormModal({ onClose, onSave }: CompanyFormModalPr
                 <option value="EDUCATION">Education</option>
                 <option value="OTHER">Other</option>
               </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company Size</label>
+            </FormField>
+
+            <FormField
+              label="Company Size"
+              name="companySize"
+              icon={User}
+            >
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.companySize}
-                onChange={(e) => setFormData({ ...formData, companySize: e.target.value })}
+                value={values.companySize}
+                onChange={(e) => handleChange('companySize', e.target.value)}
+                onBlur={() => handleBlur('companySize')}
+                className="appearance-none"
               >
                 <option value="SMALL">Small (1-50)</option>
                 <option value="MEDIUM">Medium (51-200)</option>
                 <option value="LARGE">Large (200+)</option>
               </select>
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+          <FormField
+            label="Location"
+            name="location"
+            error={errors.location}
+            touched={touched.location}
+            icon={MapPin}
+          >
             <input
               type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              placeholder="City, Country"
+              value={values.location}
+              onChange={(e) => handleChange('location', e.target.value)}
+              onBlur={() => handleBlur('location')}
             />
-          </div>
+          </FormField>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <FormField
+              label="Email"
+              name="email"
+              error={errors.email}
+              touched={touched.email}
+              icon={Mail}
+              required
+            >
               <input
                 type="email"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="contact@company.com"
+                value={values.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                onBlur={() => handleBlur('email')}
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            </FormField>
+
+            <FormField
+              label="Phone"
+              name="phone"
+              error={errors.phone}
+              touched={touched.phone}
+              icon={Phone}
+            >
               <input
                 type="tel"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+1 (555) 000-0000"
+                value={values.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                onBlur={() => handleBlur('phone')}
               />
-            </div>
+            </FormField>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Revenue ($)</label>
+          <FormField
+            label="Annual Revenue ($)"
+            name="revenue"
+            error={errors.revenue}
+            touched={touched.revenue}
+            icon={DollarSign}
+          >
             <input
               type="number"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={formData.revenue}
-              onChange={(e) => setFormData({ ...formData, revenue: Number(e.target.value) })}
+              placeholder="0"
+              value={values.revenue}
+              onChange={(e) => handleChange('revenue', Number(e.target.value))}
+              onBlur={() => handleBlur('revenue')}
             />
-          </div>
+          </FormField>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+              className="px-6 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+              disabled={isSubmitting}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 font-semibold text-sm"
             >
-              Create Company
+              {isSubmitting ? 'Creating...' : 'Create Company'}
             </button>
           </div>
         </form>
       </div>
-    </div >
+    </div>
   );
-}
+}

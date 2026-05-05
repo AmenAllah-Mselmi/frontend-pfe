@@ -9,7 +9,8 @@ export type Contact = {
     name: string;
     email: string;
     phone: string;
-    companyId?: number
+    companyId?: number;
+    company?: import("./companyStore").Company;
     status?: ContactStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -17,7 +18,12 @@ export type Contact = {
 type ContactState = {
     contacts: Contact[];
     loading: boolean;
-    loadContacts: () => Promise<void>;
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    itemsPerPage: number;
+    loadContacts: (page?: number, limit?: number) => Promise<void>;
+    fetchAllContacts: () => Promise<Contact[]>;
     addContact: (contact: Omit<Contact, "id" | "createdAt" | "updatedAt">) => Promise<void>;
     deleteContact: (id: number) => Promise<void>;
     updateContact: (id: number, updatedContact: Partial<Contact>) => Promise<void>;
@@ -27,15 +33,43 @@ const base = process.env.NEXT_PUBLIC_API_URL || '';
 export const useContactStore = create<ContactState>((set) => ({
     contacts: [],
     loading: false,
-    loadContacts: async () => {
+    totalItems: 0,
+    totalPages: 0,
+    currentPage: 1,
+    itemsPerPage: 10,
+    loadContacts: async (page = 1, limit = 10) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/contacts`, { credentials: "include" });
-            const data = await response.json();
-            const parsed = Array.isArray(data) ? data : (data && (Array.isArray(data.data) ? data.data : (Array.isArray(data.contacts) ? data.contacts : [])));
-            set({ contacts: parsed, loading: false });
+            const response = await fetch(`${base}/contacts?page=${page}&limit=${limit}`, { credentials: "include" });
+            const result = await response.json();
+            
+            if (result.data && Array.isArray(result.data)) {
+                set({ 
+                    contacts: result.data, 
+                    totalItems: result.total, 
+                    totalPages: result.totalPages,
+                    currentPage: result.page,
+                    itemsPerPage: result.limit,
+                    loading: false 
+                });
+            } else {
+                const parsed = Array.isArray(result) ? result : (result && (Array.isArray(result.data) ? result.data : (Array.isArray(result.contacts) ? result.contacts : [])));
+                set({ contacts: parsed, loading: false });
+            }
         } catch (error) {
             set({ loading: false });
+        }
+    },
+    fetchAllContacts: async () => {
+        try {
+            const response = await fetch(`${base}/contacts?page=1&limit=10000`, { credentials: "include" });
+            const result = await response.json();
+            if (result.data && Array.isArray(result.data)) return result.data;
+            if (Array.isArray(result)) return result;
+            return [];
+        } catch (error) {
+            console.error("Error fetching all contacts:", error);
+            return [];
         }
     },
     addContact: async (contact) => {

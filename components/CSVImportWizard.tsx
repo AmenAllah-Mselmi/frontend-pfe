@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Upload, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
+import CompanySelector from './Form/CompanySelector';
 
 export interface FieldDef {
   key: string;
@@ -41,6 +42,7 @@ export default function CSVImportWizard({
   const [errors, setErrors] = useState<{ row: number; error: string }[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
+  const [globalCompanyId, setGlobalCompanyId] = useState<number | undefined>(undefined);
 
   if (!isOpen) return null;
 
@@ -53,6 +55,7 @@ export default function CSVImportWizard({
     setValidData([]);
     setErrors([]);
     setIsImporting(false);
+    setGlobalCompanyId(undefined);
   };
 
   const handleClose = () => {
@@ -142,6 +145,11 @@ export default function CSVImportWizard({
             item[field.key] = val;
           }
         }
+      }
+
+      // Merge global company ID if selected and not provided in CSV
+      if (globalCompanyId && !item.companyId) {
+        item.companyId = globalCompanyId;
       }
 
       if (!hasError) {
@@ -245,6 +253,20 @@ export default function CSVImportWizard({
                 <button type="button" className="px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg text-sm hover:bg-gray-200 transition">
                   Select File
                 </button>
+              </div>
+
+              <div className="mt-8 text-left bg-gray-50 p-6 rounded-xl border border-gray-100">
+                <div className="flex items-center gap-2 mb-3 text-gray-800 font-semibold">
+                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">?</span>
+                  <h3>Assign to a Company? (Optional)</h3>
+                </div>
+                <p className="text-sm text-gray-500 mb-4 italic">
+                  Select a company to assign to ALL imported records. If a record already has a company in the CSV, that will take priority.
+                </p>
+                <CompanySelector 
+                  value={globalCompanyId} 
+                  onChange={setGlobalCompanyId} 
+                />
               </div>
             </div>
           )}

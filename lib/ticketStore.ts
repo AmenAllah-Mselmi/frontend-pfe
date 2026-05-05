@@ -13,16 +13,22 @@ export type Ticket = {
     title: string;
     description: string;
     status: TicketStatus;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     contactId?: number;
-    leadId?: number;
+    leadId: number;
     userId: number;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string;
+    updatedAt?: string;
 };
 type TicketState = {
     tickets: Ticket[];
     loading: boolean;
-    loadTickets: () => Promise<void>;
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+    itemsPerPage: number;
+    loadTickets: (page?: number, limit?: number) => Promise<void>;
+    fetchAllTickets: () => Promise<Ticket[]>;
     addTicket: (ticket: Omit<Ticket, "id" | "createdAt" | "updatedAt">) => Promise<void>;
     deleteTicket: (id: number) => Promise<void>;
     updateTicket: (id: number, updatedTicket: Partial<Ticket>) => Promise<void>;
@@ -32,21 +38,49 @@ const base = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Strip any frontend-only computed fields before sending to API
 const toApiPayload = (data: Partial<Ticket & Record<string, any>>): Partial<Ticket> => {
-    const { priority, tags, assignedTo, leadName, contactName, ...rest } = data;
+    const { tags, assignedTo, leadName, contactName, ...rest } = data;
     return rest;
 };
 
 export const useTicketStore = create<TicketState>((set) => ({
     tickets: [],
     loading: false,
-    loadTickets: async () => {
+    totalItems: 0,
+    totalPages: 0,
+    currentPage: 1,
+    itemsPerPage: 10,
+    loadTickets: async (page = 1, limit = 10) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/tickets`, { credentials: "include" });
-            const data = await response.json();
-            set({ tickets: data, loading: false });
+            const response = await fetch(`${base}/tickets?page=${page}&limit=${limit}`, { credentials: "include" });
+            const result = await response.json();
+            
+            if (result.data && Array.isArray(result.data)) {
+                set({ 
+                    tickets: result.data, 
+                    totalItems: result.total, 
+                    totalPages: result.totalPages,
+                    currentPage: result.page,
+                    itemsPerPage: result.limit,
+                    loading: false 
+                });
+            } else {
+                set({ tickets: result, loading: false });
+            }
         } catch (error) {
             set({ loading: false });
+        }
+    },
+    fetchAllTickets: async () => {
+        try {
+            const response = await fetch(`${base}/tickets?page=1&limit=10000`, { credentials: "include" });
+            const result = await response.json();
+            if (result.data && Array.isArray(result.data)) return result.data;
+            if (Array.isArray(result)) return result;
+            return [];
+        } catch (error) {
+            console.error("Error fetching all tickets:", error);
+            return [];
         }
     },
     addTicket: async (ticket) => {
