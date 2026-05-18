@@ -15,6 +15,8 @@ export default function CompanyDetailsModal({ company, onClose, onEdit, onDelete
   const [analytics, setAnalytics] = useState<any>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
+  const companyDataStr = JSON.stringify(company);
+
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -25,7 +27,7 @@ export default function CompanyDetailsModal({ company, onClose, onEdit, onDelete
       setLoadingAnalytics(false);
     };
     fetchAnalytics();
-  }, [company.id]);
+  }, [company.id, companyDataStr]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

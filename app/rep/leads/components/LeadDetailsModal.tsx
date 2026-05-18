@@ -38,6 +38,12 @@ export default function LeadDetailsModal({
   const [isScoring, setIsScoring] = useState(false);
   const [leadAnalytics, setLeadAnalytics] = useState<any>(null);
 
+  const leadDataStr = JSON.stringify({
+    notes: lead?.notes?.length,
+    tasks: lead?.tasks?.map((t:any) => t.status),
+    emails: lead?.emails?.length
+  });
+
   useEffect(() => {
     const fetchScore = async () => {
       setIsScoring(true);
@@ -54,7 +60,7 @@ export default function LeadDetailsModal({
       setIsScoring(false);
     };
     if (lead?.id) fetchScore();
-  }, [lead?.id]);
+  }, [lead?.id, leadDataStr]);
 
   useEffect(() => {
     const fetchLeadAnalytics = async () => {
@@ -65,7 +71,7 @@ export default function LeadDetailsModal({
       } catch (e) { console.error(e); }
     };
     if (lead?.id) fetchLeadAnalytics();
-  }, [lead?.id]);
+  }, [lead?.id, leadDataStr]);
 
 
   const handleConvertToDealClick = async () => {
@@ -267,15 +273,6 @@ export default function LeadDetailsModal({
                     </div>
                   </div>
                 )}
-                {/* Lead History Charts (Own Curves) */}
-                {leadAnalytics?.history && (
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mt-4">
-                    <h3 className="font-semibold mb-3 flex items-center gap-2"><TrendingUp size={14} className="text-emerald-500" /> Évolution Engagement</h3>
-                    <div className="w-full">
-                      <AnalyticsCharts type="revenue" data={leadAnalytics.history.map((h: any) => ({ month: h.month, value: h.activities + h.emails }))} height={180} />
-                    </div>
-                  </div>
-                )}
 
                 {/* AI Insights Card */}
                 {isScoring ? (
@@ -359,6 +356,16 @@ export default function LeadDetailsModal({
 
             {/* Right Panel - Notes & Tasks */}
             <div className="w-2/3 p-6 overflow-y-auto">
+              {/* Lead History Charts (Own Curves) */}
+              {leadAnalytics?.history && (
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+                  <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp size={14} className="text-emerald-500" /> Intensité de l'Engagement</h4>
+                  <div className="w-full">
+                    <AnalyticsCharts type="revenue" data={leadAnalytics.history.map((h: any) => ({ month: h.month, value: h.activities + h.emails }))} height={180} />
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-4 mb-6">
                 <button onClick={() => setActiveTab('notes')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${activeTab === 'notes' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600'

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Send, X, MessageSquare, Bot, User, Loader2 } from 'lucide-react';
+import { useAuthStore } from '@/lib/authStore';
 
 const ALLOWED_TOPICS = [
   'crm', 'lead', 'leads', 'prospect', 'pipeline', 'deal', 'deals',
@@ -10,6 +10,7 @@ const ALLOWED_TOPICS = [
 ];
 
 export default function SimpleChatbot() {
+  const { user } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'bot'; content: string }[]>([]);
@@ -48,24 +49,31 @@ export default function SimpleChatbot() {
     }
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!apiKey) throw new Error('Clé API manquante');
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${API_URL}/ai-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          question: userQuery,
+          userId: user?.id,
+          role: user?.role
+        }),
+      });
 
-      const genAI = new GoogleGenerativeAI(apiKey);
-      // Utilisation de 1.5-flash pour éviter l'erreur 404 de gemini-pro
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      if (!response.ok) {
+        throw new Error(`Erreur serveur: ${response.status}`);
+      }
 
-      const prompt = `Tu es un assistant CRM. Réponds de manière courte et utile. Question: ${userQuery}`;
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-
-      setMessages(prev => [...prev, { role: 'bot', content: text }]);
+      const data = await response.json();
+      setMessages(prev => [...prev, { role: 'bot', content: data.response }]);
     } catch (err: any) {
       const errorMessage = err?.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('high demand')) {
         setMessages(prev => [...prev, { 
           role: 'bot', 
-          content: "⏳ Le service d'IA (Gemini) est actuellement surchargé (erreur 503). Merci de réessayer d'ici quelques minutes !" 
+          content: "⏳ Le service d'IA est actuellement surchargé. Merci de réessayer d'ici quelques minutes !" 
         }]);
       } else {
         setError("Désolé, une erreur est survenue.");

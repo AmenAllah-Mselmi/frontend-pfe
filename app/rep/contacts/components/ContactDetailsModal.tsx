@@ -17,6 +17,12 @@ export default function ContactDetailsModal({ contact, onClose, onUpdate, onDele
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [analytics, setAnalytics] = useState<any>(null);
 
+  const contactDataStr = JSON.stringify({
+    notes: contact?.notes,
+    status: contact?.status,
+    lastContact: contact?.lastContact
+  });
+
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
@@ -26,7 +32,7 @@ export default function ContactDetailsModal({ contact, onClose, onUpdate, onDele
       } catch (e) { console.error(e); }
     };
     if (contact?.id) fetchAnalytics();
-  }, [contact?.id]);
+  }, [contact?.id, contactDataStr]);
 
   const statusColors: any = {
     'Active': 'bg-green-100 text-green-700',
