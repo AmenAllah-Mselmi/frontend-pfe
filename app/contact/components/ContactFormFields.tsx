@@ -179,8 +179,8 @@ const ContactFormFields = ({ form, onInterestSelect }: ContactFormFieldsProps) =
               onClick={() => onInterestSelect(interest)}
               className={`px-4 py-3 text-xs sm:text-sm rounded-xl border transition-all duration-200 font-medium ${
                 values.interest === interest
-                  ? 'border-[#FF375E] bg-[#FF375E]/5 text-[#FF375E] shadow-sm'
-                  : 'border-gray-200 hover:border-[#FF375E]/30 text-gray-600'
+                  ? 'border-[#1a4494] bg-[#1a4494]/5 text-[#1a4494] shadow-sm'
+                  : 'border-gray-200 hover:border-[#1a4494]/30 text-gray-600'
               }`}
             >
               {interest}

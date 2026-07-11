@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { fetchWithCache as fetch } from './fetchWithCache';
 import toast from 'react-hot-toast';
 enum ContactStatus {
     ACTIVE = 'ACTIVE',
@@ -22,7 +23,7 @@ type ContactState = {
     totalPages: number;
     currentPage: number;
     itemsPerPage: number;
-    loadContacts: (page?: number, limit?: number) => Promise<void>;
+    loadContacts: (page?: number, limit?: number, search?: string) => Promise<void>;
     fetchAllContacts: () => Promise<Contact[]>;
     addContact: (contact: Omit<Contact, "id" | "createdAt" | "updatedAt">) => Promise<void>;
     deleteContact: (id: number) => Promise<void>;
@@ -37,10 +38,13 @@ export const useContactStore = create<ContactState>((set) => ({
     totalPages: 0,
     currentPage: 1,
     itemsPerPage: 10,
-    loadContacts: async (page = 1, limit = 10) => {
+    loadContacts: async (page = 1, limit = 10, search?: string) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/contacts?page=${page}&limit=${limit}`, { credentials: "include" });
+            const url = search 
+                ? `${base}/contacts?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
+                : `${base}/contacts?page=${page}&limit=${limit}`;
+            const response = await fetch(url, { credentials: "include" });
             const result = await response.json();
             
             if (result.data && Array.isArray(result.data)) {

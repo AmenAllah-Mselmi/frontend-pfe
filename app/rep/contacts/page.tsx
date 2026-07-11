@@ -61,8 +61,8 @@ export default function ContactsPage() {
       c.email?.toLowerCase().includes(search.toLowerCase())
     );
 
-    if (filters.status) {
-      filtered = filtered.filter(c => c.status === filters.status);
+    if (filters.statuses && filters.statuses.length > 0) {
+      filtered = filtered.filter(c => filters.statuses.map((s: string) => s.toUpperCase()).includes(c.status));
     }
 
     if (filters.source) {
@@ -228,18 +228,21 @@ export default function ContactsPage() {
 
       <div className="p-6">
         {/* Stats */}
-        <ContactsStats contacts={filteredContacts} myContacts={myContacts} />
+        <ContactsStats contacts={filteredContacts} myContacts={myContacts} totalItems={totalItems} />
 
         {/* Active Filters Display */}
         {Object.keys(filters).length > 0 && (
           <div className="flex items-center gap-2 mb-4 p-3 bg-emerald-50 rounded-lg">
             <span className="text-xs text-emerald-700 font-medium">Active filters:</span>
-            {filters.status && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-white text-emerald-700 rounded-lg text-xs">
-                Status: {filters.status}
-                <button onClick={() => setFilters({ ...filters, status: undefined })}>×</button>
+            {filters.statuses && filters.statuses.map((status: string) => (
+              <span key={status} className="inline-flex items-center gap-1 px-2 py-1 bg-white text-emerald-700 rounded-lg text-xs">
+                Status: {status}
+                <button onClick={() => setFilters({
+                  ...filters,
+                  statuses: filters.statuses.filter((s: string) => s !== status)
+                })}>×</button>
               </span>
-            )}
+            ))}
             {filters.source && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-white text-emerald-700 rounded-lg text-xs">
                 Source: {filters.source}

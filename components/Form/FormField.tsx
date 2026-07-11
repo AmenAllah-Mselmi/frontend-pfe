@@ -30,7 +30,7 @@ const FormField: React.FC<FormFieldProps> = ({
   const isValid = !!(touched && !error);
 
   // Clone the child and inject standard props like role, aria-invalid, etc.
-  const inputElement = React.cloneElement(children, {
+  const inputElement = React.isValidElement<any>(children) ? React.cloneElement(children, {
     id: name,
     name,
     'aria-invalid': hasError ? 'true' : 'false',
@@ -48,7 +48,7 @@ const FormField: React.FC<FormFieldProps> = ({
       }
       ${children.props.className || ""}
     `.trim(),
-  });
+  }) : children;
 
   return (
     <div className={`space-y-1.5 ${className}`}>

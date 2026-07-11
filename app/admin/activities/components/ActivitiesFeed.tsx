@@ -16,7 +16,7 @@ import {
   Star
 } from 'lucide-react';
 
-export default function ActivitiesFeed({ activities, onActivityClick }: any) {
+export default function ActivitiesFeed({ activities, onActivityClick, onEdit, onDelete }: any) {
   const [filter, setFilter] = useState('all');
 
   const getIcon = (type: string) => {
@@ -145,7 +145,9 @@ export default function ActivitiesFeed({ activities, onActivityClick }: any) {
                     <span className="text-gray-500">{userName}</span>
                   </div>
                   <span className="text-gray-300">•</span>
-                  <span className="text-gray-500 capitalize">{a.entity || 'unknown'}</span>
+                  <span className="text-gray-500 capitalize">
+                    {a.entity || 'unknown'} {a.metadata?.entityName ? `- ${a.metadata.entityName}` : (a.entityId ? `- #${a.entityId}` : '')}
+                  </span>
                   {a.metadata?.value && (
                     <>
                       <span className="text-gray-300">•</span>
@@ -157,9 +159,10 @@ export default function ActivitiesFeed({ activities, onActivityClick }: any) {
                 </div>
               </div>
 
-              <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded-lg transition">
-                <MoreHorizontal size={16} className="text-gray-400" />
-              </button>
+              <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition">
+                <button onClick={(e) => { e.stopPropagation(); if (onEdit) onEdit(a); }} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-medium">Edit</button>
+                <button onClick={(e) => { e.stopPropagation(); if (onDelete) onDelete(a); }} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg text-xs font-medium">Delete</button>
+              </div>
             </div>
           );
         })}

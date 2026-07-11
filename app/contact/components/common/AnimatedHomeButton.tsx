@@ -10,12 +10,12 @@ const AnimatedHomeButton = () => {
   return (
     <Link
       href="/"
-      className="relative inline-flex items-center px-5 py-3 bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-xl overflow-hidden group"
+      className="relative inline-flex items-center px-5 py-3 bg-linear-to-r from-[#1a4494] to-[#f28224] text-white rounded-xl overflow-hidden group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Effet de fond animé */}
-      <div className={`absolute inset-0 bg-linear-to-r from-blue-600 to-blue-600 transition-transform duration-300 ${isHovered ? 'translate-x-0' : '-translate-x-full'
+      <div className={`absolute inset-0 bg-linear-to-r from-[#143a7d] to-[#d97020] transition-transform duration-300 ${isHovered ? 'translate-x-0' : '-translate-x-full'
         }`}></div>
 
       <div className="relative flex items-center">

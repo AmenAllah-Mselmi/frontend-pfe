@@ -57,7 +57,8 @@ function LeadsContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
- 
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   const searchParams = useSearchParams();
   const action = searchParams.get('action');
  
@@ -94,11 +95,11 @@ function LeadsContent() {
   const scoringDone = useRef(false);
 
   useEffect(() => {
-    loadLeads(currentPage, itemsPerPage);
+    loadLeads(currentPage, itemsPerPage, searchQuery);
     loadNotes();
     loadTasks();
     loadUsers();
-  }, [currentPage, itemsPerPage, loadLeads, loadNotes, loadTasks, loadUsers]);
+  }, [loadLeads, loadNotes, loadTasks, loadUsers, currentPage, itemsPerPage, refreshTrigger, searchQuery]);
 
   // Auto-calculate AI scores for leads missing them (runs once)
   useEffect(() => {
@@ -275,6 +276,8 @@ function LeadsContent() {
       });
       toast.success('Email sent successfully');
       setShowEmail(false);
+      setRefreshTrigger(prev => prev + 1);
+      loadLeads(currentPage, itemsPerPage);
     } catch (err) {
       console.error('Failed to send email', err);
       toast.error('Failed to send email. Check console.');
@@ -374,11 +377,25 @@ function LeadsContent() {
     }
   };
 
+  const totalLeadsCount = filteredLeads.length;
+  const qualifiedLeads = filteredLeads.filter((l: any) => l.status === 'QUALIFIED').length;
+  const activeLeadsCount = filteredLeads.filter((l: any) => l.status !== 'LOST').length;
+
+  const pipelineValue = filteredLeads
+    .filter((l: any) => l.status !== 'LOST')
+    .reduce((sum: number, lead: any) => sum + (Number(lead.dealValue) || 0), 0);
+
+  const conversionRate = totalLeadsCount > 0 ? ((qualifiedLeads / totalLeadsCount) * 100).toFixed(1) : '0.0';
+  const avgDealSize = activeLeadsCount > 0 ? pipelineValue / activeLeadsCount : 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-4 sm:p-6 max-w-7xl mx-auto">
         <Header
-          totalLeads={filteredLeads.length}
+          totalLeads={totalLeadsCount}
+          pipelineValue={pipelineValue}
+          conversionRate={conversionRate}
+          avgDealSize={avgDealSize}
           onFilterClick={() => setShowFilters(!showFilters)}
           onExport={async () => {
             const allLeads = await useLeadStore.getState().fetchAllLeads();
@@ -585,6 +602,7 @@ function LeadsContent() {
           }}
           currentUser={user?.id?.toString() || user?.email || "1"}
           users={userList.length > 0 ? userList : users}
+          refreshTrigger={refreshTrigger}
         />
       )}
 

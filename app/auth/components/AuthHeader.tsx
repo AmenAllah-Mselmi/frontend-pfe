@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface AuthHeaderProps {
   isLogin: boolean;
   onToggle: () => void;
@@ -12,7 +14,7 @@ const AuthHeader = ({ isLogin, onToggle }: AuthHeaderProps) => {
           onClick={onToggle}
           className={`flex-1 py-4 text-center font-medium transition-colors ${
             isLogin 
-              ? 'text-[#FF375E] border-b-2 border-[#FF375E]' 
+              ? 'text-[#1a4494] border-b-2 border-[#1a4494]' 
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -22,7 +24,7 @@ const AuthHeader = ({ isLogin, onToggle }: AuthHeaderProps) => {
           onClick={onToggle}
           className={`flex-1 py-4 text-center font-medium transition-colors ${
             !isLogin 
-              ? 'text-[#FF375E] border-b-2 border-[#FF375E]' 
+              ? 'text-[#1a4494] border-b-2 border-[#1a4494]' 
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
@@ -33,12 +35,10 @@ const AuthHeader = ({ isLogin, onToggle }: AuthHeaderProps) => {
       {/* Logo et titre */}
       <div className="p-8 pb-0 text-center">
         <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-linear-to-r from-[#FF375E] to-[#FF5E5E] rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-2xl">m</span>
-          </div>
+          <Image src="/logo.png" alt="CRM Micro SaaS Logo" width={180} height={50} className="object-contain" priority />
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          {isLogin ? 'Bienvenue sur monday.com' : 'Commencez gratuitement'}
+          {isLogin ? 'Bienvenue sur CRM MICRO SAAS' : 'Commencez gratuitement'}
         </h1>
         <p className="text-gray-600">
           {isLogin 

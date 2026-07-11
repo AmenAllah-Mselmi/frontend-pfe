@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, FileText, Mail, Phone, CheckCircle, Target, DollarSign, GitBranch, Search } from 'lucide-react';
+import { X, FileText, Mail, Phone, CheckCircle, Target, DollarSign, GitBranch, Search, Users } from 'lucide-react';
 import { useActivityStore } from '@/lib/activityStore';
 import { useLeadStore, Lead } from '@/lib/leadStore';
 import { useContactStore } from '@/lib/contactStore';
@@ -61,7 +61,7 @@ export default function CreateActivityModal({ onClose }: any) {
         ...data,
         id: Date.now(),
         entityId: parseInt(data.entityId) || 0,
-        metadata,
+        metadata: { ...metadata, entityName: selectedEntityName },
         userId: user?.id || 1,
         user: user ? { 
           name: user.name, 
@@ -99,6 +99,7 @@ export default function CreateActivityModal({ onClose }: any) {
     { value: 'call_logged', label: 'Call Logged', icon: Phone },
     { value: 'task_completed', label: 'Task Completed', icon: CheckCircle },
     { value: 'pipeline_created', label: 'Pipeline Created', icon: GitBranch },
+    { value: 'meeting', label: 'Meeting Scheduled', icon: Users },
   ];
 
   const entities = [

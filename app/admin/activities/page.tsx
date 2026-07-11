@@ -16,6 +16,8 @@ import ActivitiesFilters from './components/ActivitiesFilters';
 import ActivitiesStats from './components/ActivitiesStats';
 import ActivityDetailsModal from './components/ActivityDetailsModal';
 import CreateActivityModal from './components/CreateActivityModal';
+import EditActivityModal from './components/EditActivityModal';
+import DeleteActivityModal from './components/DeleteActivityModal';
 import DateRangePicker from './components/DateRangePicker';
 import Pagination from '@/components/Pagination';
 import { useActivityStore } from '@/lib/activityStore';
@@ -23,6 +25,8 @@ import { useActivityStore } from '@/lib/activityStore';
 export default function ActivitiesPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
@@ -200,6 +204,14 @@ export default function ActivitiesPage() {
               setSelectedActivity(a);
               setShowDetails(true);
             }}
+            onEdit={(a: any) => {
+              setSelectedActivity(a);
+              setShowEdit(true);
+            }}
+            onDelete={(a: any) => {
+              setSelectedActivity(a);
+              setShowDelete(true);
+            }}
           />
           <div className="bg-white border-t px-4 py-3">
              <Pagination
@@ -216,6 +228,20 @@ export default function ActivitiesPage() {
       {/* Modals */}
       {showCreate && (
         <CreateActivityModal onClose={() => setShowCreate(false)} />
+      )}
+
+      {showEdit && selectedActivity && (
+        <EditActivityModal
+          activity={selectedActivity}
+          onClose={() => setShowEdit(false)}
+        />
+      )}
+
+      {showDelete && selectedActivity && (
+        <DeleteActivityModal
+          activity={selectedActivity}
+          onClose={() => setShowDelete(false)}
+        />
       )}
 
       {showDetails && selectedActivity && (

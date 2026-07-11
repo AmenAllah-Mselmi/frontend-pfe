@@ -12,13 +12,18 @@ interface KanbanViewProps {
 }
 
 export default function KanbanView({ leads, onLeadClick, onEdit, onDelete, onStatusChange }: KanbanViewProps) {
-  const statuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'LOST'];
+  const statuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'NEGOCIATION', 'PROPOSITION', 'LOST'];
 
-  const statusColors: Record<string, { bg: string; dot: string; text: string }> = {
-    'NEW': { bg: 'bg-blue-50', dot: 'bg-blue-500', text: 'text-blue-700' },
-    'CONTACTED': { bg: 'bg-yellow-50', dot: 'bg-yellow-500', text: 'text-yellow-700' },
-    'QUALIFIED': { bg: 'bg-emerald-50', dot: 'bg-emerald-500', text: 'text-emerald-700' },
-    'LOST': { bg: 'bg-red-50', dot: 'bg-red-500', text: 'text-red-700' }
+  const getStatusVisuals = (status: string) => {
+    const visuals: any = {
+      'NEW': { bg: 'bg-blue-50', dot: 'bg-blue-500', text: 'text-blue-700' },
+      'CONTACTED': { bg: 'bg-yellow-50', dot: 'bg-yellow-500', text: 'text-yellow-700' },
+      'QUALIFIED': { bg: 'bg-emerald-50', dot: 'bg-emerald-500', text: 'text-emerald-700' },
+      'NEGOCIATION': { bg: 'bg-orange-50', dot: 'bg-orange-500', text: 'text-orange-700' },
+      'PROPOSITION': { bg: 'bg-purple-50', dot: 'bg-purple-500', text: 'text-purple-700' },
+      'LOST': { bg: 'bg-red-50', dot: 'bg-red-500', text: 'text-red-700' }
+    };
+    return visuals[status] || { bg: 'bg-gray-50', dot: 'bg-gray-500', text: 'text-gray-700' };
   };
 
   const getLeadsByStatus = (status: string) => leads.filter(lead => lead.status === status);
@@ -43,7 +48,7 @@ export default function KanbanView({ leads, onLeadClick, onEdit, onDelete, onSta
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
       {statuses.map(status => {
         const statusLeads = getLeadsByStatus(status);
-        const colors = statusColors[status];
+        const colors = getStatusVisuals(status);
 
         return (
           <div key={status} className="space-y-3">

@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 // Types
 enum Role {
-  ADMIN = "ADMIN",
+  MANAGER = "ADMIN",
   REP = "REP"
 }
 export type User = {
@@ -30,6 +30,7 @@ interface AuthState {
   register: (userData: any) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  updateProfile: (userData: Partial<User>) => Promise<void>;
   clearError: () => void;
 }
 
@@ -50,7 +51,7 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const base = process.env.NEXT_PUBLIC_API_URL || '';
-          const res = await fetch(`${base}/users/login`, {
+          const res = await fetch(`${base}/auth/login`, {
             credentials: "include",
             method: 'POST',
             headers: {
@@ -135,7 +136,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         try {
           const base = process.env.NEXT_PUBLIC_API_URL || '';
-          await fetch(`${base}/users/logout`, { method: 'POST', credentials: 'include' });
+          await fetch(`${base}/auth/logout`, { method: 'POST', credentials: 'include' });
         } catch(e) {}
 
         // Clear token from store
@@ -174,7 +175,7 @@ export const useAuthStore = create<AuthState>()(
           const data = await res.json();
 
           if (!res.ok) {
-            // Token invalid or expired
+            // SalesManager role value
             set({ user: null, token: null, isAuthenticated: false, isLoading: false, error: data?.message || 'Session expired' });
             return;
           }
@@ -193,6 +194,45 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: error?.message || 'Session expired',
           });
+        }
+      },
+
+      // Update Profile action
+      updateProfile: async (userData: Partial<User>) => {
+        set({ isLoading: true, error: null });
+        const { token } = get();
+        try {
+          const base = process.env.NEXT_PUBLIC_API_URL || '';
+          const res = await fetch(`${base}/users/profile/me`, {
+            credentials: "include",
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(userData),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            const message = data?.message || 'Profile update failed';
+            set({ isLoading: false, error: message });
+            throw new Error(message);
+          }
+
+          // Update user in state
+          set((state) => ({
+            user: { ...state.user, ...data } as User,
+            isLoading: false,
+            error: null,
+          }));
+        } catch (error: any) {
+          set({
+            isLoading: false,
+            error: error?.message || 'Profile update failed',
+          });
+          throw error;
         }
       },
 

@@ -33,10 +33,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Check Admin Routes
+  // Check Manager Routes
   if (pathname.startsWith('/admin')) {
     if (userRole !== 'ADMIN' && userRole !== 'admin') {
-      console.log('➡️ Redirecting to login - user is not an Admin');
+      console.log('➡️ Redirecting to login - user is not a Manager');
       const loginUrl = new URL('/auth', request.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);

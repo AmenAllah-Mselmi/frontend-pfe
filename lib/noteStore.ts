@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { fetchWithCache as fetch } from './fetchWithCache';
 
 export type Note = {
     id: number;

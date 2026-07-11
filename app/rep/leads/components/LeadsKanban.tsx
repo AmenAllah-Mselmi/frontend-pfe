@@ -2,9 +2,9 @@
 import { FileText, CheckSquare, Calendar } from 'lucide-react';
 
 export default function LeadsKanban({ leads, onLeadClick, onStatusChange }: any) {
-  const statuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'LOST'];
-  const colors: any = { 'NEW': 'bg-blue-50', 'CONTACTED': 'bg-yellow-50', 'QUALIFIED': 'bg-emerald-50', 'LOST': 'bg-red-50' };
-  const dots: any = { 'NEW': 'bg-blue-500', 'CONTACTED': 'bg-yellow-500', 'QUALIFIED': 'bg-emerald-500', 'LOST': 'bg-red-500' };
+  const statuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'NEGOCIATION', 'PROPOSITION', 'LOST'];
+  const colors: any = { 'NEW': 'bg-blue-50', 'CONTACTED': 'bg-yellow-50', 'QUALIFIED': 'bg-emerald-50', 'NEGOCIATION': 'bg-orange-50', 'PROPOSITION': 'bg-purple-50', 'LOST': 'bg-red-50' };
+  const dots: any = { 'NEW': 'bg-blue-500', 'CONTACTED': 'bg-yellow-500', 'QUALIFIED': 'bg-emerald-500', 'NEGOCIATION': 'bg-orange-500', 'PROPOSITION': 'bg-purple-500', 'LOST': 'bg-red-500' };
 
   const handleDragStart = (e: React.DragEvent, leadId: number) => {
     e.dataTransfer.setData('leadId', leadId.toString());

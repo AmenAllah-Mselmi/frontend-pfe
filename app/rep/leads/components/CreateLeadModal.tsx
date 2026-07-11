@@ -104,6 +104,8 @@ export default function CreateLeadModal({ onClose, onCreate }: any) {
                 <option value="NEW">New</option>
                 <option value="CONTACTED">Contacted</option>
                 <option value="QUALIFIED">Qualified</option>
+                <option value="NEGOCIATION">Negociation</option>
+                <option value="PROPOSITION">Proposition</option>
                 <option value="LOST">Lost</option>
               </select>
             </FormField>

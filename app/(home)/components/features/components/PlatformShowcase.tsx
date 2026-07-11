@@ -12,7 +12,7 @@ const PlatformShowcase = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
-          className="bg-linear-to-r from-[#FF375E] to-[#FF5E5E] rounded-2xl p-8 md:p-12 text-white"
+          className="bg-linear-to-r from-[#1a4494] to-[#f28224] rounded-2xl p-8 md:p-12 text-white"
         >
           <div className="max-w-3xl mx-auto text-center">
             <div className="text-5xl mb-6">✨</div>

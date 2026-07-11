@@ -7,6 +7,8 @@ export default function LeadsTable({ leads, onLeadClick, onEmail }: any) {
     'NEW': 'bg-blue-100 text-blue-700',
     'CONTACTED': 'bg-yellow-100 text-yellow-700',
     'QUALIFIED': 'bg-emerald-100 text-emerald-700',
+    'NEGOCIATION': 'bg-orange-100 text-orange-700',
+    'PROPOSITION': 'bg-purple-100 text-purple-700',
     'LOST': 'bg-red-100 text-red-700'
   };
 

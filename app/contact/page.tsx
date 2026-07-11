@@ -64,7 +64,7 @@ const ContactForm = () => {
           <div>
             <div className="bg-white rounded-3xl border border-gray-100 shadow-2xl p-8 sm:p-10 relative overflow-hidden">
               {/* Decorative accent */}
-              <div className="absolute top-0 left-0 w-2 h-full bg-linear-to-b from-[#FF375E] to-[#FF5E5E]" />
+              <div className="absolute top-0 left-0 w-2 h-full bg-linear-to-b from-[#1a4494] to-[#f28224]" />
               
               <div className="mb-10">
                 <h2 className="text-3xl font-extrabold text-gray-900 mb-3 tracking-tight">
@@ -90,7 +90,7 @@ const ContactForm = () => {
                   <button
                     type="submit"
                     disabled={form.isSubmitting}
-                    className="w-full mt-8 py-4 bg-linear-to-r from-[#FF375E] to-[#FF5E5E] text-white font-bold rounded-xl hover:shadow-xl hover:shadow-[#FF375E]/20 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center disabled:opacity-50 disabled:transform-none select-none"
+                    className="w-full mt-8 py-4 bg-linear-to-r from-[#1a4494] to-[#f28224] text-white font-bold rounded-xl hover:shadow-xl hover:shadow-[#1a4494]/20 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center disabled:opacity-50 disabled:transform-none select-none"
                   >
                     {form.isSubmitting ? (
                       <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -102,7 +102,7 @@ const ContactForm = () => {
 
                   <p className="text-[10px] text-gray-400 text-center mt-6 leading-relaxed">
                     En soumettant ce formulaire, vous acceptez notre{' '}
-                    <a href="/privacy" className="text-[#FF375E] hover:underline font-semibold transition-all">
+                    <a href="/privacy" className="text-[#1a4494] hover:underline font-semibold transition-all">
                       politique de confidentialité
                     </a>
                     . Vos données seront traitées avec le plus grand soin.
@@ -114,23 +114,23 @@ const ContactForm = () => {
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <a
                 href="tel:+21612345678"
-                className="flex items-center justify-center p-5 bg-white border border-gray-100 rounded-2xl hover:border-[#FF375E] hover:shadow-md transition-all group"
+                className="flex items-center justify-center p-5 bg-white border border-gray-100 rounded-2xl hover:border-[#1a4494] hover:shadow-md transition-all group"
               >
-                <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mr-4 group-hover:bg-[#FF375E]/5 transition-colors">
-                  <Phone className="w-5 h-5 text-gray-400 group-hover:text-[#FF375E] transition-colors" />
+                <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mr-4 group-hover:bg-[#1a4494]/5 transition-colors">
+                  <Phone className="w-5 h-5 text-gray-400 group-hover:text-[#1a4494] transition-colors" />
                 </div>
-                <span className="font-semibold text-gray-700 group-hover:text-[#FF375E] transition-colors">
+                <span className="font-semibold text-gray-700 group-hover:text-[#1a4494] transition-colors">
                   Appelez-nous
                 </span>
               </a>
               <a
-                href="mailto:commercial@monday.com"
-                className="flex items-center justify-center p-5 bg-white border border-gray-100 rounded-2xl hover:border-[#FF375E] hover:shadow-md transition-all group"
+                href="mailto:commercial@crmmicrosaas.com"
+                className="flex items-center justify-center p-5 bg-white border border-gray-100 rounded-2xl hover:border-[#1a4494] hover:shadow-md transition-all group"
               >
-                <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mr-4 group-hover:bg-[#FF375E]/5 transition-colors">
-                  <Mail className="w-5 h-5 text-gray-400 group-hover:text-[#FF375E] transition-colors" />
+                <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center mr-4 group-hover:bg-[#1a4494]/5 transition-colors">
+                  <Mail className="w-5 h-5 text-gray-400 group-hover:text-[#1a4494] transition-colors" />
                 </div>
-                <span className="font-semibold text-gray-700 group-hover:text-[#FF375E] transition-colors">
+                <span className="font-semibold text-gray-700 group-hover:text-[#1a4494] transition-colors">
                   Écrivez-nous
                 </span>
               </a>

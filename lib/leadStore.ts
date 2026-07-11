@@ -1,10 +1,13 @@
 import { create } from "zustand";
+import { fetchWithCache as fetch } from './fetchWithCache';
 import toast from 'react-hot-toast';
 
 enum Status {
     NEW = "NEW",
     CONTACTED = "CONTACTED",
     QUALIFIED = "QUALIFIED",
+    NEGOCIATION = "NEGOCIATION",
+    PROPOSITION = "PROPOSITION",
     LOST = "LOST",
 }
 
@@ -34,7 +37,7 @@ type LeadState = {
     totalPages: number;
     currentPage: number;
     itemsPerPage: number;
-    loadLeads: (page?: number, limit?: number) => Promise<void>;
+    loadLeads: (page?: number, limit?: number, search?: string) => Promise<void>;
     fetchAllLeads: () => Promise<Lead[]>;
     addLead: (lead: Omit<Lead, "id" | "createdAt" | "updatedAt">) => Promise<void>;
     deleteLead: (id: number) => Promise<void>;
@@ -51,10 +54,13 @@ export const useLeadStore = create<LeadState>((set) => ({
     currentPage: 1,
     itemsPerPage: 10,
 
-    loadLeads: async (page = 1, limit = 10) => {
+    loadLeads: async (page = 1, limit = 10, search?: string) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/leads?page=${page}&limit=${limit}`, { credentials: "include" });
+            const url = search 
+                ? `${base}/leads?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
+                : `${base}/leads?page=${page}&limit=${limit}`;
+            const response = await fetch(url, { credentials: "include" });
             const result = await response.json();
             
             // Handle both old and new response formats for backward compatibility during transition

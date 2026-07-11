@@ -31,8 +31,8 @@ export default function CompaniesPage() {
   const { companies, totalItems, loadCompanies, addCompany, updateCompany, deleteCompany } = useCompanyStore();
   
   useEffect(() => {
-    loadCompanies(currentPage, itemsPerPage);
-  }, [loadCompanies, currentPage, itemsPerPage]);
+    loadCompanies(currentPage, itemsPerPage, searchQuery);
+  }, [loadCompanies, currentPage, itemsPerPage, searchQuery]);
 
   // Normalize companies into a typed array in case API returns a wrapper
   const companyList: Company[] = Array.isArray(companies)

@@ -43,13 +43,13 @@ export default function ContactsPage() {
   const { emails ,loadEmails,sendEmail} = useEmailStore();
   // Fetch Companies on Mount
   useEffect(() => {
-    loadContacts(currentPage, itemsPerPage);
+    loadContacts(currentPage, itemsPerPage, search);
     const base = process.env.NEXT_PUBLIC_API_URL || '';
     fetch(`${base}/companies`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setCompanies(data); })
       .catch(() => { });
-  }, [loadContacts, currentPage, itemsPerPage]);
+  }, [loadContacts, currentPage, itemsPerPage, search]);
 
   // Appliquer les filtres et la recherche
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function ContactsPage() {
 
     // Filtre par statut
     if (filters.statuses && filters.statuses.length > 0) {
-      filtered = filtered.filter(c => filters.statuses.includes(c.status));
+      filtered = filtered.filter(c => filters.statuses.map((s: string) => s.toUpperCase()).includes(c.status));
     }
 
     // Filtre par source
@@ -218,7 +218,7 @@ export default function ContactsPage() {
 
       <div className="p-4 sm:p-6">
         {/* Stats */}
-        <ContactsStats contacts={filteredContacts} />
+        <ContactsStats contacts={filteredContacts} totalItems={totalItems} />
 
         {/* Active Filters Display */}
         {Object.keys(filters).length > 0 && (

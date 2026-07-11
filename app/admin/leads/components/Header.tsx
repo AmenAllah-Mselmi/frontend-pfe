@@ -1,15 +1,24 @@
 interface HeaderProps {
   totalLeads: number;
+  pipelineValue?: number;
+  conversionRate?: string;
+  avgDealSize?: number;
   onFilterClick: () => void;
   onExport?: () => void;
 }
 
-export default function Header({ totalLeads, onFilterClick, onExport }: HeaderProps) {
+export default function Header({ totalLeads, pipelineValue = 0, conversionRate = "0.0", avgDealSize = 0, onFilterClick, onExport }: HeaderProps) {
+  const formatCurrency = (val: number) => {
+    if (val >= 1000000) return '$' + (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return '$' + (val / 1000).toFixed(1) + 'K';
+    return '$' + val.toFixed(0);
+  };
+
   const metrics = [
-    { label: 'Pipeline Value', value: '$2.4M', change: '+12.3%', icon: '💰' },
-    { label: 'Conversion Rate', value: '23.5%', change: '+5.2%', icon: '📈' },
-    { label: 'Active Leads', value: totalLeads.toString(), change: '+8', icon: '👥' },
-    { label: 'Avg. Deal Size', value: '$24.5K', change: '-2.1%', icon: '📊' }
+    { label: 'Pipeline Value', value: formatCurrency(pipelineValue), change: 'Calculé en temps réel', icon: '💰' },
+    { label: 'Conversion Rate', value: `${conversionRate}%`, change: 'Calculé en temps réel', icon: '📈' },
+    { label: 'Total Leads', value: totalLeads.toString(), change: 'Calculé en temps réel', icon: '👥' },
+    { label: 'Avg. Deal Size', value: formatCurrency(avgDealSize), change: 'Calculé en temps réel', icon: '📊' }
   ];
 
   return (

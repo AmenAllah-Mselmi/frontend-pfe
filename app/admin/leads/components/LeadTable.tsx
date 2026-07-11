@@ -23,9 +23,11 @@ export default function LeadTable({ data, selectedRows, setSelectedRows, onLeadC
 
   const statusColors: Record<string, string> = {
     'NEW': 'bg-blue-50 text-blue-700 ring-1 ring-blue-600/20',
-    'CONTACTED': 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20',
+    'CONTACTED': 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20',
     'QUALIFIED': 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20',
-    'LOST': 'bg-red-50 text-red-700 ring-1 ring-red-600/20'
+    'NEGOCIATION': 'bg-orange-50 text-orange-700 ring-1 ring-orange-600/20',
+    'PROPOSITION': 'bg-purple-50 text-purple-700 ring-1 ring-purple-600/20',
+    'LOST': 'bg-rose-50 text-rose-700 ring-1 ring-rose-600/20'
   };
 
   // Trier les données

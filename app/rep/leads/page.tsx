@@ -16,6 +16,7 @@ import { useLeadStore } from '@/lib/leadStore';
 import { useNoteStore } from '@/lib/noteStore';
 import { useTaskStore } from '@/lib/taskStore';
 import { useUserStore } from '@/lib/userStore';
+import { useAuthStore } from '@/lib/authStore';
 import { exportToCSV } from '@/lib/exportCsv';
 
 const CURRENT_USER = 'Alex M.';
@@ -42,6 +43,7 @@ function LeadsContent() {
   const [selectedForEmail, setSelectedForEmail] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { leads, totalItems, loadLeads, addLead, updateLead } = useLeadStore();
   const { notes, loadNotes, addNote, updateNote, deleteNote } = useNoteStore();
   const { tasks, loadTasks, addTask, updateTask, deleteTask } = useTaskStore();
@@ -51,11 +53,11 @@ function LeadsContent() {
   const scoringDone = useRef(false);
 
   useEffect(() => {
-    loadLeads(currentPage, itemsPerPage);
+    loadLeads(currentPage, itemsPerPage, search);
     loadNotes();
     loadTasks();
     loadUsers();
-  }, [loadLeads, loadNotes, loadTasks, loadUsers, currentPage, itemsPerPage]);
+  }, [loadLeads, loadNotes, loadTasks, loadUsers, currentPage, itemsPerPage, refreshTrigger, search]);
 
   // Auto-calculate AI scores for leads missing them (runs once)
   useEffect(() => {
@@ -79,7 +81,8 @@ function LeadsContent() {
     if (leads.length > 0) calcMissing();
   }, [leads]);
 
-  const currentUserId = users.length > 0 ? users[0].id : 2;
+  const { user } = useAuthStore();
+  const currentUserId = user?.id || (users.length > 0 ? users[0].id : 2);
 
   // Appliquer les filtres et la recherche
   useEffect(() => {
@@ -192,7 +195,7 @@ function LeadsContent() {
         status: 'sent',
         emailType: 'transactional',
         sentAt: new Date().toISOString(),
-        userId: 1,
+        userId: currentUserId,
         leadId: selectedForEmail?.id || undefined
       };
       const res = await fetch(`${base}/emails`, {
@@ -207,6 +210,8 @@ function LeadsContent() {
       } else {
         toast.success('Email sent successfully!');
         setShowEmail(false);
+        setRefreshTrigger(prev => prev + 1);
+        loadLeads(currentPage, itemsPerPage);
       }
     } catch (err) {
       console.error('Failed to send email', err);
@@ -514,6 +519,7 @@ function LeadsContent() {
           currentUser={CURRENT_USER}
           onConvertToContact={handleConvertToContact}
           onConvertToDeal={handleConvertToDeal}
+          refreshTrigger={refreshTrigger}
         />
       )}
 

@@ -18,7 +18,7 @@ const FormSuccess = ({ onReset }: FormSuccessProps) => {
       </p>
       <button
         onClick={onReset}
-        className="px-6 py-3 border-2 border-[#FF375E] text-[#FF375E] font-medium rounded-lg hover:bg-[#FF375E] hover:text-white transition-colors"
+        className="px-6 py-3 border-2 border-[#1a4494] text-[#1a4494] font-medium rounded-lg hover:bg-[#1a4494] hover:text-white transition-colors"
       >
         Envoyer un nouveau message
       </button>

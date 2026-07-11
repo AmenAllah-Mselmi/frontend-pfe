@@ -97,7 +97,7 @@ const LoginForm = ({ onSubmit, isLoading }: LoginFormProps) => {
             id="rememberMe"
             checked={values.rememberMe}
             onChange={(e) => handleChange('rememberMe', e.target.checked)}
-            className="h-4 w-4 text-[#FF375E] focus:ring-[#FF375E] border-gray-300 rounded transition-all cursor-pointer"
+            className="h-4 w-4 text-[#1a4494] focus:ring-[#1a4494] border-gray-300 rounded transition-all cursor-pointer"
           />
           <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-700 cursor-pointer select-none">
             Se souvenir de moi
@@ -108,7 +108,7 @@ const LoginForm = ({ onSubmit, isLoading }: LoginFormProps) => {
         <button
           type="submit"
           disabled={isLoading || isSubmitting}
-          className="w-full py-3 bg-gradient-to-r from-[#FF375E] to-[#FF5E5E] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:-translate-y-0.5 active:translate-y-0"
+          className="w-full py-3 bg-gradient-to-r from-[#1a4494] to-[#f28224] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:-translate-y-0.5 active:translate-y-0"
         >
           {isLoading || isSubmitting ? (
             <>

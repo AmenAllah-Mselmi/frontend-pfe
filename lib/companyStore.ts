@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { fetchWithCache as fetch } from './fetchWithCache';
 import toast from 'react-hot-toast';
 
 enum CompanyIndustry {
@@ -31,7 +32,7 @@ type CompanyState = {
     totalPages: number;
     currentPage: number;
     itemsPerPage: number;
-    loadCompanies: (page?: number, limit?: number) => Promise<void>;
+    loadCompanies: (page?: number, limit?: number, search?: string) => Promise<void>;
     fetchAllCompanies: () => Promise<Company[]>;
     addCompany: (company: Omit<Company, "id" | "createdAt" | "updatedAt">) => Promise<void>;
     deleteCompany: (id: number) => Promise<void>;
@@ -46,10 +47,13 @@ export const useCompanyStore = create<CompanyState>((set) => ({
     totalPages: 0,
     currentPage: 1,
     itemsPerPage: 10,
-    loadCompanies: async (page = 1, limit = 10) => {
+    loadCompanies: async (page = 1, limit = 10, search?: string) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/companies?page=${page}&limit=${limit}`, { credentials: "include" });
+            const url = search 
+                ? `${base}/companies?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`
+                : `${base}/companies?page=${page}&limit=${limit}`;
+            const response = await fetch(url, { credentials: "include" });
             const result = await response.json();
             
             if (result.data && Array.isArray(result.data)) {

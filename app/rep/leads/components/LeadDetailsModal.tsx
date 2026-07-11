@@ -45,22 +45,26 @@ export default function LeadDetailsModal({
   });
 
   useEffect(() => {
-    const fetchScore = async () => {
+    const fetchSavedScore = async () => {
       setIsScoring(true);
       try {
         const base = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${base}/lead-scoring/${lead.id}`, { credentials: 'include' });
+        const res = await fetch(`${base}/lead-scoring/${lead.id}/saved`, { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
-          setScoreData(data);
+          if (data) setScoreData(data);
         }
       } catch (err) {
         console.error('Failed to fetch lead score', err);
       }
       setIsScoring(false);
     };
-    if (lead?.id) fetchScore();
-  }, [lead?.id, leadDataStr]);
+    if (lead?.leadScore) {
+      setScoreData(lead.leadScore);
+    } else if (lead?.id) {
+      fetchSavedScore();
+    }
+  }, [lead?.id]);
 
   useEffect(() => {
     const fetchLeadAnalytics = async () => {
@@ -336,14 +340,21 @@ export default function LeadDetailsModal({
                           {scoreData.reasons && (typeof scoreData.reasons === 'string' ? JSON.parse(scoreData.reasons) : scoreData.reasons).find((r: string) => r.startsWith('Action:'))?.replace('Action: ', '') || 'Follow up to evaluate needs'}
                         </span>
                         <button 
-                          onClick={() => {
-                            const actionReason = scoreData.reasons && (typeof scoreData.reasons === 'string' ? JSON.parse(scoreData.reasons) : scoreData.reasons).find((r: string) => r.startsWith('Action:'))?.replace('Action: ', '');
-                            if (actionReason?.includes('Call')) toast.success('Initiating dialer...');
-                            // else if (actionReason?.includes('email')) onSendEmail && onSendEmail(lead); // Not available in rep modal currently
-                            else toast.success('Opening scheduler...!');
+                          onClick={async () => {
+                            const loadingId = toast.loading('Recalculating AI Score...');
+                            try {
+                              const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                              const res = await fetch(`${base}/lead-scoring/${lead.id}`, { credentials: 'include' });
+                              if (!res.ok) throw new Error('Recalculation failed');
+                              const newScore = await res.json();
+                              setScoreData(newScore);
+                              toast.success('AI Analysis reloaded successfully!', { id: loadingId });
+                            } catch (error) {
+                              toast.error('Failed to reload AI analysis', { id: loadingId });
+                            }
                           }}
-                          className="mt-1 w-full py-2 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/20 border border-indigo-400/50">
-                          Execute Suggested Workflow
+                          className="mt-2 w-full py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-[10px] uppercase tracking-widest font-black rounded-lg transition-all shadow-lg shadow-indigo-500/20 border border-indigo-400/50 group-hover/action:scale-[1.02]">
+                          Reload AI Analysis
                         </button>
                       </div>
                     </div>

@@ -13,15 +13,15 @@ const ContactInfo = () => {
       {/* En-tête */}
       <div className="mb-10">
         <div className="inline-flex items-center space-x-2 mb-4">
-          <div className="w-2 h-2 bg-linear-to-r from-[#FF375E] to-[#FF5E5E] rounded-full"></div>
-          <span className="text-sm font-semibold text-[#FF375E] uppercase tracking-wider">
+          <div className="w-2 h-2 bg-linear-to-r from-[#1a4494] to-[#f28224] rounded-full"></div>
+          <span className="text-sm font-semibold text-[#1a4494] uppercase tracking-wider">
             Contact Commercial
           </span>
         </div>
         
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
           Construisez votre solution
-          <span className="block text-[#FF375E]">monday.com</span>
+          <span className="block text-[#1a4494]">CRM MICRO SAAS</span>
         </h1>
         
         <p className="text-lg text-gray-600 mb-8">
@@ -35,7 +35,7 @@ const ContactInfo = () => {
 
       {/* Témoignage */}
       <TestimonialCard
-        quote="Avec monday.com, on a une vision centralisée et partagée par projet, par statut d'avancement et par niveau de priorisation, avec des informations structurées et uniformes."
+        quote="Avec CRM MICRO SAAS, on a une vision centralisée et partagée par projet, par statut d'avancement et par niveau de priorisation, avec des informations structurées et uniformes."
         author="Marc Chassagnette"
         position="Responsable de la Transformation Finance France"
         company="Carrefour"
@@ -57,7 +57,7 @@ const ContactInfo = () => {
             <p className="text-sm text-gray-600">
               Pour toute question technique ou liée à la facturation, 
               rendez-vous dans notre{' '}
-              <a href="/help" className="text-[#FF375E] hover:underline font-medium">
+              <a href="/help" className="text-[#1a4494] hover:underline font-medium">
                 centre d&apos;aide
               </a>.
             </p>

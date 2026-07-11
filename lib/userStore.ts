@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import { fetchWithCache as fetch } from './fetchWithCache';
 enum Role {
-    ADMIN = "ADMIN",
+    MANAGER = "ADMIN",
     REP = "REP"
 }
 export type User = {
@@ -28,7 +29,7 @@ export const useUserStore = create<UserState>((set) => ({
     loadUsers: async () => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/users`, { credentials: "include" });
+            const response = await fetch(`${base}/admin/users`, { credentials: "include" });
             const data = await response.json();
             set({ users: Array.isArray(data) ? data : [], loading: false });
         } catch (error) {
@@ -38,7 +39,7 @@ export const useUserStore = create<UserState>((set) => ({
     addUser: async (user) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/users`, {
+            const response = await fetch(`${base}/admin/users`, {
                 credentials: "include",
                 method: "POST",
                 headers: {
@@ -57,7 +58,7 @@ export const useUserStore = create<UserState>((set) => ({
     deleteUser: async (id: number) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/users/${id}`, {
+            const response = await fetch(`${base}/admin/users/${id}`, {
                 credentials: "include",
                 method: "DELETE",
             });
@@ -69,7 +70,7 @@ export const useUserStore = create<UserState>((set) => ({
     updateUser: async (id: number, updated: Partial<User>) => {
         set({ loading: true });
         try {
-            const response = await fetch(`${base}/users/${id}`, {
+            const response = await fetch(`${base}/admin/users/${id}`, {
                 credentials: "include",
                 method: "PATCH",
                 headers: {

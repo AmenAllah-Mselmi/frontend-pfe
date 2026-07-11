@@ -5,6 +5,7 @@ import { X, Upload, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-r
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
 import CompanySelector from './Form/CompanySelector';
+import { fetchWithCache as fetch } from '@/lib/fetchWithCache';
 
 export interface FieldDef {
   key: string;

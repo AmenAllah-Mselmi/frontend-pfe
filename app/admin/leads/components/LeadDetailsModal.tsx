@@ -15,7 +15,7 @@ import { validators } from '@/lib/utils/validation';
 import FormField from '@/components/Form/FormField';
 import AiEmailModal from './AiEmailModal';
 
-export default function LeadDetailsModal({ lead, onClose, onAddNote, onDeleteNote, onUpdateNote, onAddTask, onUpdateTask, onDeleteTask, onConvertToContact, onConvertToDeal, onShowEmailHistory, onSendEmail, users, currentUser }: any) {
+export default function LeadDetailsModal({ lead, onClose, onAddNote, onDeleteNote, onUpdateNote, onAddTask, onUpdateTask, onDeleteTask, onConvertToContact, onConvertToDeal, onShowEmailHistory, onSendEmail, users, currentUser, refreshTrigger = 0 }: any) {
   const [activeTab, setActiveTab] = useState<'notes' | 'tasks'>('notes');
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
   const [editNoteContent, setEditNoteContent] = useState('');
@@ -56,26 +56,26 @@ export default function LeadDetailsModal({ lead, onClose, onAddNote, onDeleteNot
   }, [currentUser, taskForm]);
 
   useEffect(() => {
-    const fetchScore = async () => {
+    const fetchSavedScore = async () => {
       setIsScoring(true);
       try {
         const base = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${base}/lead-scoring/${lead.id}`, { credentials: 'include' });
+        const res = await fetch(`${base}/lead-scoring/${lead.id}/saved`, { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
-          setScoreData(data);
+          if (data) setScoreData(data);
         }
       } catch (err) {
         console.error('Failed to fetch lead score', err);
       }
       setIsScoring(false);
     };
-    if (lead?.id && !lead.leadScore) {
-      fetchScore();
-    } else {
+    if (lead?.leadScore) {
       setScoreData(lead.leadScore);
+    } else if (lead?.id) {
+      fetchSavedScore();
     }
-  }, [lead]);
+  }, [lead?.id]);
 
   const leadDataStr = JSON.stringify({
     notes: lead?.notes?.length,
@@ -92,7 +92,7 @@ export default function LeadDetailsModal({ lead, onClose, onAddNote, onDeleteNot
       } catch (e) { console.error(e); }
     };
     if (lead?.id) fetchLeadAnalytics();
-  }, [lead?.id, leadDataStr]);
+  }, [lead?.id, leadDataStr, refreshTrigger]);
 
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editTaskData, setEditTaskData] = useState({ title: '', dueDate: '', priority: 'medium' });
@@ -348,14 +348,21 @@ export default function LeadDetailsModal({ lead, onClose, onAddNote, onDeleteNot
                           {scoreData.reasons && (typeof scoreData.reasons === 'string' ? JSON.parse(scoreData.reasons) : scoreData.reasons).find((r: string) => r.startsWith('Action:'))?.replace('Action: ', '') || 'Follow up to evaluate needs'}
                         </span>
                         <button 
-                          onClick={() => {
-                            const actionReason = scoreData.reasons && (typeof scoreData.reasons === 'string' ? JSON.parse(scoreData.reasons) : scoreData.reasons).find((r: string) => r.startsWith('Action:'))?.replace('Action: ', '');
-                            if (actionReason?.includes('Call')) toast.success('Initiating priority dialer...');
-                            else if (actionReason?.includes('email')) onSendEmail && onSendEmail(lead);
-                            else toast.success('Opening strategic scheduler...');
+                          onClick={async () => {
+                            const loadingId = toast.loading('Recalculating AI Score...');
+                            try {
+                              const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                              const res = await fetch(`${base}/lead-scoring/${lead.id}`, { credentials: 'include' });
+                              if (!res.ok) throw new Error('Recalculation failed');
+                              const newScore = await res.json();
+                              setScoreData(newScore);
+                              toast.success('AI Analysis reloaded successfully!', { id: loadingId });
+                            } catch (error) {
+                              toast.error('Failed to reload AI analysis', { id: loadingId });
+                            }
                           }}
                           className="mt-2 w-full py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-[10px] uppercase tracking-widest font-black rounded-lg transition-all shadow-lg shadow-indigo-500/20 border border-indigo-400/50 group-hover/action:scale-[1.02]">
-                          Execute AI Recommendation
+                          Reload AI Analysis
                         </button>
                       </div>
                     </div>

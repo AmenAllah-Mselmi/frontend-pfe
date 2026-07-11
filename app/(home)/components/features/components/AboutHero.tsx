@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const AboutHero = () => {
   const stats = [
-    { number: "10K+", label: "Active Teams", color: "#FF375E" },
+    { number: "10K+", label: "Active Teams", color: "#1a4494" },
     { number: "99.9%", label: "Uptime", color: "#00c875" },
     { number: "500+", label: "Integrations", color: "#579bfc" },
     { number: "24/7", label: "Support", color: "#a25ddc" }
@@ -24,12 +24,12 @@ const AboutHero = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring" }}
-            className="w-20 h-20 bg-linear-to-br from-[#FF375E] to-[#FF5E5E] rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+            className="w-20 h-20 bg-linear-to-br from-[#1a4494] to-[#f28224] rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg"
           >
             <span className="text-white text-3xl font-bold">★</span>
           </motion.div>
           <h1 className="text-4xl md:text-5xl font-bold text-[#323338] mb-4">
-            Built for <span className="text-[#FF375E]">Modern Teams</span>
+            Built for <span className="text-[#1a4494]">Modern Teams</span>
           </h1>
           <p className="text-[#676879] text-lg max-w-2xl mx-auto">
             Discover the powerful features that make our platform the choice for thousands of teams worldwide

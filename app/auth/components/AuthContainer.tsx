@@ -29,6 +29,7 @@ const AuthContainer = () => {
     try {
       if (isLogin) {
         await login(data.email, data.password);
+        handleAuthSuccess();
       } else {
         // Map frontend fields (firstName, lastName, email, password, company) to backend DTO fields
         const userData = {
@@ -39,8 +40,8 @@ const AuthContainer = () => {
           role: 'ADMIN' // Manager -> Admin
         };
         await register(userData);
+        setIsLogin(true);
       }
-      handleAuthSuccess();
     } catch (error) {
       // Error is handled in the store, we could show a toast here too
       console.error('Authentication error:', error);
@@ -80,7 +81,7 @@ const AuthContainer = () => {
                   Pas encore de compte ?{' '}
                   <button
                     onClick={() => setIsLogin(false)}
-                    className="text-[#FF375E] hover:text-[#FF5E5E] font-medium"
+                    className="text-[#1a4494] hover:text-[#f28224] font-medium"
                   >
                     Créer un compte
                   </button>
@@ -90,7 +91,7 @@ const AuthContainer = () => {
                   Déjà un compte ?{' '}
                   <button
                     onClick={() => setIsLogin(true)}
-                    className="text-[#FF375E] hover:text-[#FF5E5E] font-medium"
+                    className="text-[#1a4494] hover:text-[#f28224] font-medium"
                   >
                     Se connecter
                   </button>
@@ -104,9 +105,9 @@ const AuthContainer = () => {
         <div className="mt-8 text-center text-xs text-gray-500">
           <p>
             En continuant, vous acceptez nos{' '}
-            <a href="/terms" className="text-[#FF375E] hover:underline">Conditions d&apos;utilisation</a>{' '}
+            <a href="/terms" className="text-[#1a4494] hover:underline">Conditions d&apos;utilisation</a>{' '}
             et notre{' '}
-            <a href="/privacy" className="text-[#FF375E] hover:underline">Politique de confidentialité</a>.
+            <a href="/privacy" className="text-[#1a4494] hover:underline">Politique de confidentialité</a>.
           </p>
         </div>
       </div>

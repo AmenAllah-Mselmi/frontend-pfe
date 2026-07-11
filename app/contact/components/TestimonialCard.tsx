@@ -22,7 +22,7 @@ const TestimonialCard = ({
         </blockquote>
       </div>
       <div className="flex items-center">
-        <div className="w-12 h-12 bg-gradient-to-r from-[#FF375E] to-[#FF5E5E] rounded-full flex items-center justify-center text-white font-bold">
+        <div className="w-12 h-12 bg-gradient-to-r from-[#1a4494] to-[#f28224] rounded-full flex items-center justify-center text-white font-bold">
           {initials}
         </div>
         <div className="ml-4">

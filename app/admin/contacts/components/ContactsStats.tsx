@@ -1,7 +1,7 @@
 import { Users, UserPlus, Building2, Calendar, Download } from 'lucide-react';
 
-export default function ContactsStats({ contacts }: any) {
-  const total = contacts.length;
+export default function ContactsStats({ contacts, totalItems }: any) {
+  const total = totalItems || contacts.length;
   const active = contacts.filter((c: any) => c.status === 'Active').length;
   const leads = contacts.filter((c: any) => c.status === 'Lead').length;
   const companies = [...new Set(contacts.map((c: any) => c.company))].length;

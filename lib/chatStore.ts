@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { fetchWithCache as fetch } from './fetchWithCache';
 import io, { Socket } from 'socket.io-client';
 
 export interface ChatMessage {

@@ -174,7 +174,7 @@ export default function AdminSidebar({
         {/* Footer */}
         <div className="absolute bottom-0 w-full border-t border-gray-200 bg-white p-4">
           {/* Profil */}
-          <div className="flex items-center gap-3 mb-3">
+          <Link href="/admin/profile" className="flex items-center gap-3 mb-3 hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
               {userName?.split(' ').map((n: string) => n[0]).join('') ?? 'U'}
             </div>
@@ -184,7 +184,7 @@ export default function AdminSidebar({
                 <p className="text-xs text-gray-500 truncate capitalize">{userRole}</p>
               </div>
             )}
-          </div>
+          </Link>
 
           {/* Déconnexion */}
           <button

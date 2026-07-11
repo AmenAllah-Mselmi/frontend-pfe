@@ -10,7 +10,7 @@ const Integrations = () => {
     <div className="py-16 px-4 bg-[#fafafa]">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-[#323338] text-center mb-8">
-          Seamless <span className="text-[#FF375E]">Integrations</span>
+          Seamless <span className="text-[#1a4494]">Integrations</span>
         </h2>
         
         <div className="flex flex-wrap justify-center gap-4">

@@ -183,13 +183,13 @@ const SignupForm = ({ onSubmit, isLoading }: SignupFormProps) => {
                 checked={values.acceptTerms}
                 onChange={(e) => handleChange('acceptTerms', e.target.checked)}
                 onBlur={() => handleBlur('acceptTerms')}
-                className={`h-4 w-4 text-[#FF375E] focus:ring-[#FF375E] border-gray-300 rounded mt-1 transition-all ${touched.acceptTerms && errors.acceptTerms ? 'border-red-500 ring-1 ring-red-500' : values.acceptTerms ? 'border-emerald-500 ring-1 ring-emerald-500' : ''}`}
+                className={`h-4 w-4 text-[#1a4494] focus:ring-[#1a4494] border-gray-300 rounded mt-1 transition-all ${touched.acceptTerms && errors.acceptTerms ? 'border-red-500 ring-1 ring-red-500' : values.acceptTerms ? 'border-emerald-500 ring-1 ring-emerald-500' : ''}`}
               />
               <label htmlFor="acceptTerms" className="ml-2 text-sm text-gray-700">
                 J&apos;accepte les{' '}
-                <a href="/terms" className="text-[#FF375E] hover:underline">Conditions d&apos;utilisation</a>{' '}
+                <a href="/terms" className="text-[#1a4494] hover:underline">Conditions d&apos;utilisation</a>{' '}
                 et la{' '}
-                <a href="/privacy" className="text-[#FF375E] hover:underline">Politique de confidentialité</a>
+                <a href="/privacy" className="text-[#1a4494] hover:underline">Politique de confidentialité</a>
               </label>
             </div>
             {touched.acceptTerms && errors.acceptTerms && (
@@ -205,7 +205,7 @@ const SignupForm = ({ onSubmit, isLoading }: SignupFormProps) => {
               id="newsletter"
               checked={values.newsletter}
               onChange={(e) => handleChange('newsletter', e.target.checked)}
-              className="h-4 w-4 text-[#FF375E] focus:ring-[#FF375E] border-gray-300 rounded mt-1"
+              className="h-4 w-4 text-[#1a4494] focus:ring-[#1a4494] border-gray-300 rounded mt-1"
             />
             <label htmlFor="newsletter" className="ml-2 text-sm text-gray-700">
               Je souhaite recevoir des conseils, astuces et offres par email
@@ -217,7 +217,7 @@ const SignupForm = ({ onSubmit, isLoading }: SignupFormProps) => {
         <button
           type="submit"
           disabled={isLoading || isSubmitting}
-          className="w-full py-3 bg-gradient-to-r from-[#FF375E] to-[#FF5E5E] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:-translate-y-0.5 active:translate-y-0"
+          className="w-full py-3 bg-gradient-to-r from-[#1a4494] to-[#f28224] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:-translate-y-0.5 active:translate-y-0"
         >
           {isLoading || isSubmitting ? (
             <>

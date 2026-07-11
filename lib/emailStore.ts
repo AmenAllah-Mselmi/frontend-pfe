@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { fetchWithCache as fetch } from './fetchWithCache';
 
 // Matches the backend Email model exactly
 export type Email = {

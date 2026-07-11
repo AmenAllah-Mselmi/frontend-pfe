@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { fetchWithCache as fetch } from './fetchWithCache';
 import toast from 'react-hot-toast';
 
 export type Activity = {

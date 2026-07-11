@@ -12,13 +12,13 @@ import {
 import { useLeadStore } from '@/lib/leadStore';
 
 export default function DashboardPage() {
-  const { leads, loadLeads } = useLeadStore();
+  const { leads, loadLeads, totalItems } = useLeadStore();
 
   useEffect(() => {
     loadLeads();
   }, [loadLeads]);
 
-  const totalLeads = leads.length;
+  const totalLeads = totalItems || leads.length;
   const qualifiedLeads = leads.filter(l => l.status === 'QUALIFIED').length;
   const activeLeadsCount = leads.filter((l) => l.status !== 'LOST').length;
 
@@ -43,31 +43,31 @@ export default function DashboardPage() {
   const stats = [
     {
       label: 'Pipeline Value',
-      value: formatCurrency(pipelineValue === 0 ? 2400000 : pipelineValue),
-      change: '+12.3% from last month',
+      value: formatCurrency(pipelineValue),
+      change: 'Calculé en temps réel',
       icon: '💰',
       trend: 'up'
     },
     {
       label: 'Conversion Rate',
-      value: `${conversionRate === '0.0' ? '23.5' : conversionRate}%`,
-      change: '+5.2% from last month',
+      value: `${conversionRate}%`,
+      change: 'Calculé en temps réel',
       icon: '📈',
       trend: 'up'
     },
     {
-      label: 'Active Leads',
-      value: activeLeadsCount === 0 ? '123' : activeLeadsCount.toString(),
-      change: '+8 from last month',
+      label: 'Total Leads',
+      value: totalLeads.toString(),
+      change: 'Calculé en temps réel',
       icon: '👥',
       trend: 'up'
     },
     {
       label: 'Avg. Deal Size',
-      value: formatCurrency(avgDealSize === 0 ? 24500 : avgDealSize),
-      change: '-2.1% from last month',
+      value: formatCurrency(avgDealSize),
+      change: 'Calculé en temps réel',
       icon: '📊',
-      trend: 'down'
+      trend: 'up'
     }
   ];
 

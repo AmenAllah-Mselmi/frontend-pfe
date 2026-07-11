@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
@@ -14,12 +15,7 @@ const Navbar = () => {
           {/* Logo - Gauche */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="w-8 h-8 flex items-center justify-center bg-linear-to-r from-[#FF375E] to-[#FF5E5E] rounded-sm">
-                <span className="text-white font-bold text-xl">m</span>
-              </div>
-              <span className="ml-2 text-2xl font-bold text-gray-900">
-                monday<span className="text-[#FF375E]">.com</span>
-              </span>
+              <Image src="/logo.png" alt="CRM Micro SaaS" width={140} height={40} className="object-contain" priority />
             </Link>
           </div>
 
@@ -31,7 +27,7 @@ const Navbar = () => {
             {/* Contact commercial */}
             <Link
               href="/contact"
-              className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-[#FF375E] transition-colors border border-gray-300 rounded-md hover:border-[#FF375E]/50"
+              className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-[#1a4494] transition-colors border border-gray-300 rounded-md hover:border-[#1a4494]/50"
             >
               Contact commercial
             </Link>
@@ -39,7 +35,7 @@ const Navbar = () => {
             {/* Commencer - Bouton principal */}
             <Link
               href="/auth"
-              className="px-6 py-2 bg-linear-to-r from-[#FF375E] to-[#FF5E5E] text-white font-medium rounded-md hover:opacity-95 transition-opacity shadow-sm"
+              className="px-6 py-2 bg-linear-to-r from-[#1a4494] to-[#f28224] text-white font-medium rounded-md hover:opacity-95 transition-opacity shadow-sm"
             >
               Commencer
             </Link>
@@ -61,14 +57,14 @@ const Navbar = () => {
           <div className="px-4 py-6 space-y-4">
             <Link
               href="/contact"
-              className="block px-4 py-3 text-center text-gray-700 font-medium border border-gray-300 rounded-md hover:border-[#FF375E]"
+              className="block px-4 py-3 text-center text-gray-700 font-medium border border-gray-300 rounded-md hover:border-[#1a4494]"
               onClick={() => setIsMenuOpen(false)}
             >
               Contact commercial
             </Link>
             <Link
               href="/get-started"
-              className="block px-4 py-3 text-center bg-linear-to-r from-[#FF375E] to-[#FF5E5E] text-white font-medium rounded-md hover:opacity-95"
+              className="block px-4 py-3 text-center bg-linear-to-r from-[#1a4494] to-[#f28224] text-white font-medium rounded-md hover:opacity-95"
               onClick={() => setIsMenuOpen(false)}
             >
               Commencer
@@ -76,7 +72,7 @@ const Navbar = () => {
             <div className="pt-4 border-t border-gray-200">
               <p className="text-center text-sm text-gray-500">
                 Déjà un compte ?{' '}
-                <Link href="/login" className="text-[#FF375E] hover:underline">
+                <Link href="/login" className="text-[#1a4494] hover:underline">
                   Se connecter
                 </Link>
               </p>

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -7,27 +9,22 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center">
           {/* Logo */}
           <div className="flex items-center mb-4 md:mb-0">
-            <div className="w-6 h-6 bg-[#FF375E] rounded-sm flex items-center justify-center">
-              <span className="text-white font-bold">m</span>
-            </div>
-            <span className="ml-2 text-lg font-bold text-gray-900">
-              monday<span className="text-[#FF375E]">.com</span>
-            </span>
+            <Image src="/logo.png" alt="CRM Micro SaaS Logo" width={100} height={30} className="object-contain" />
           </div>
 
           {/* Liens */}
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm text-gray-600 mb-4 md:mb-0">
-            <a href="/features" className="hover:text-[#FF375E]">Fonctionnalités</a>
-            <a href="/templates" className="hover:text-[#FF375E]">Templates</a>
-            <a href="/pricing" className="hover:text-[#FF375E]">Tarifs</a>
-            <a href="/contact" className="hover:text-[#FF375E]">Contact</a>
-            <a href="/blog" className="hover:text-[#FF375E]">Blog</a>
-            <a href="/help" className="hover:text-[#FF375E]">Aide</a>
+            <a href="/features" className="hover:text-[#1a4494]">Fonctionnalités</a>
+            <a href="/templates" className="hover:text-[#1a4494]">Templates</a>
+            <a href="/pricing" className="hover:text-[#1a4494]">Tarifs</a>
+            <a href="/contact" className="hover:text-[#1a4494]">Contact</a>
+            <a href="/blog" className="hover:text-[#1a4494]">Blog</a>
+            <a href="/help" className="hover:text-[#1a4494]">Aide</a>
           </div>
 
           {/* Copyright */}
           <div className="text-xs text-gray-500">
-            © {currentYear} Monday.com
+            © {currentYear} CRM MICRO SAAS
           </div>
         </div>
 
