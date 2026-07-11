@@ -36,20 +36,24 @@ export default function EditActivityModal({ activity, onClose }: any) {
           <FormField
             label="Activity Title"
             name="title"
-            value={values.title}
-            onChange={handleChange}
-            onBlur={handleBlur}
             error={touched.title ? errors.title : undefined}
-            placeholder="e.g., Initial call with client"
             required
-          />
+          >
+            <input
+              type="text"
+              value={values.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              onBlur={() => handleBlur('title')}
+              placeholder="e.g., Initial call with client"
+            />
+          </FormField>
 
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">Description</label>
             <textarea
               name="description"
               value={values.description}
-              onChange={handleChange}
+              onChange={(e) => handleChange('description', e.target.value)}
               rows={4}
               className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm resize-none"
               placeholder="Add details about this activity..."
