@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Building2, Users, Mail, Phone, MapPin } from 'lucide-react';
+import { X, Building2, Users, Mail, Phone, MapPin, DollarSign } from 'lucide-react';
 import { useForm } from '@/lib/hooks/useForm';
 import { validators } from '@/lib/utils/validation';
 import FormField from '@/components/Form/FormField';
@@ -13,7 +13,8 @@ export default function CreateCompanyModal({ onClose, onCreate }: any) {
       companySize: 'SMALL',
       location: '',
       email: '',
-      phone: ''
+      phone: '',
+      revenue: 0
     },
     validationSchema: {
       name: [validators.required, validators.minLength(2)],
@@ -134,6 +135,22 @@ export default function CreateCompanyModal({ onClose, onCreate }: any) {
               value={values.location} 
               onChange={(e) => handleChange('location', e.target.value)} 
               onBlur={() => handleBlur('location')}
+            />
+          </FormField>
+
+          <FormField
+            label="Annual Revenue ($)"
+            name="revenue"
+            error={errors.revenue}
+            touched={touched.revenue}
+            icon={DollarSign}
+          >
+            <input 
+              type="number" 
+              placeholder="0" 
+              value={values.revenue} 
+              onChange={(e) => handleChange('revenue', Number(e.target.value))} 
+              onBlur={() => handleBlur('revenue')}
             />
           </FormField>
 

@@ -22,6 +22,7 @@ export type Company = {
     location: string;
     companyIndustry: CompanyIndustry;
     companySize: CompanySize;
+    revenue?: number;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -66,7 +67,7 @@ export const useCompanyStore = create<CompanyState>((set) => ({
                     loading: false 
                 });
             } else {
-                set({ companies: result, loading: false });
+                set({ companies: Array.isArray(result) ? result : [], loading: false });
             }
         } catch (error) {
             set({ loading: false });
@@ -87,13 +88,17 @@ export const useCompanyStore = create<CompanyState>((set) => ({
     addCompany: async (company) => {
         set({ loading: true });
         try {
+            const payload = {
+                ...company,
+                revenue: Number(company.revenue) || 0,
+            };
             const response = await fetch(`${base}/companies`, {
                 credentials: "include",
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(company),
+                body: JSON.stringify(payload),
             });
             if (!response.ok) {
                 const err = await response.text();
@@ -124,13 +129,17 @@ export const useCompanyStore = create<CompanyState>((set) => ({
     updateCompany: async (id: number, updatedCompany: Partial<Company>) => {
         set({ loading: true });
         try {
+            const payload = {
+                ...updatedCompany,
+                ...(updatedCompany.revenue !== undefined && { revenue: Number(updatedCompany.revenue) || 0 }),
+            };
             const response = await fetch(`${base}/companies/${id}`, {
                 credentials: "include",
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(updatedCompany),
+                body: JSON.stringify(payload),
             });
             const data = await response.json();
             set((state) => ({ companies: state.companies.map((c) => c.id === id ? { ...c, ...updatedCompany } : c), loading: false }));

@@ -3,15 +3,17 @@ import { X, Tag, AlertCircle, User, Search, Building2, Briefcase } from 'lucide-
 import { useForm } from '@/lib/hooks/useForm';
 import { validators } from '@/lib/utils/validation';
 import FormField from '@/components/Form/FormField';
+import { useAuthStore } from '@/lib/authStore';
 
 export default function CreateTicketModal({ onClose, onCreate, leads, contacts, users }: any) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSelector, setActiveSelector] = useState<string | null>(null);
   const [selectedNames, setSelectedNames] = useState<Record<string, string>>({
     lead: '',
-    contact: '',
-    user: ''
+    contact: ''
   });
+
+  const { user } = useAuthStore();
 
   const { values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting, setValues } = useForm({
     initialValues: {
@@ -19,12 +21,10 @@ export default function CreateTicketModal({ onClose, onCreate, leads, contacts, 
       description: '',
       leadId: '',
       contactId: '',
-      userId: '',
       priority: 'MEDIUM'
     },
     validationSchema: {
       title: [validators.required, validators.minLength(5)],
-      userId: [validators.required],
       leadId: [validators.required]
       // contactId is optional
     },
@@ -32,7 +32,7 @@ export default function CreateTicketModal({ onClose, onCreate, leads, contacts, 
       onCreate({
         ...data,
         status: 'NEW',
-        userId: data.userId ? Number(data.userId) : undefined,
+        userId: user?.id ? Number(user.id) : undefined,
         leadId: data.leadId ? Number(data.leadId) : undefined,
         contactId: data.contactId ? Number(data.contactId) : undefined,
       });
@@ -126,63 +126,6 @@ export default function CreateTicketModal({ onClose, onCreate, leads, contacts, 
                 <option value="HIGH">High</option>
                 <option value="CRITICAL">Critical</option>
               </select>
-            </FormField>
-
-            <FormField
-              label="Assigned User"
-              name="userId"
-              error={errors.userId}
-              touched={touched.userId}
-              icon={User}
-              required
-            >
-              <div className="relative">
-                <div
-                  className={`w-full px-4 py-2 bg-gray-50 border rounded-xl cursor-pointer transition-all ${touched.userId && errors.userId ? 'border-red-500' : 'border-gray-200'}`}
-                  onClick={() => setActiveSelector(activeSelector === 'user' ? null : 'user')}
-                >
-                  <span className={selectedNames.user ? 'text-gray-900' : 'text-gray-400'}>
-                    {selectedNames.user || 'Select user...'}
-                  </span>
-                </div>
-                
-                {activeSelector === 'user' && (
-                  <div className="absolute top-full left-0 right-0 mt-2 border border-gray-100 rounded-xl shadow-xl bg-white z-20 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2">
-                    <div className="p-2 border-b sticky top-0 bg-white">
-                      <input
-                        type="text"
-                        autoFocus
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search users..."
-                        className="w-full px-3 py-1.5 border border-gray-100 rounded-lg text-sm bg-gray-50 focus:bg-white"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="py-1">
-                      {getFilteredItems('user').length > 0 ? (
-                        getFilteredItems('user').map((u: any) => (
-                          <div
-                            key={u.id}
-                            onClick={() => handleSelectItem('user', u)}
-                            className="p-3 hover:bg-emerald-50 border-b border-emerald-50 last:border-0 transition-colors flex items-center gap-3"
-                          >
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-semibold">
-                              {u.name.charAt(0)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{u.name}</p>
-                              <p className="text-xs text-gray-500 truncate">{u.role}</p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center text-sm text-gray-400 italic">No users found</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
             </FormField>
           </div>
 

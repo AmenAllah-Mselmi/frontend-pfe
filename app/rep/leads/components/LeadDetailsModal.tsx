@@ -16,7 +16,7 @@ import AiEmailModal from './AiEmailModal';
 export default function LeadDetailsModal({
   lead, onClose, onAddNote, onDeleteNote, onUpdateNote, onAddTask,
   onUpdateTask, onDeleteTask, onUpdateLead, onDeleteLead, currentUser,
-  onConvertToContact, onConvertToDeal
+  onConvertToContact, onConvertToDeal, onSendEmail
 }: any) {
   const [activeTab, setActiveTab] = useState<'notes' | 'tasks'>('notes');
   const [newNote, setNewNote] = useState('');
@@ -107,7 +107,7 @@ export default function LeadDetailsModal({
     'low': 'bg-green-100 text-green-700'
   };
 
-  const canModify = lead.owner === currentUser;
+  const canModify = true; // Allow representatives to access actions
   const canModifyNote = (note: any) => true; // note.author is not in prisma
   const canModifyTask = (task: any) => true; // task.createdBy is not in prisma
 
@@ -376,6 +376,15 @@ export default function LeadDetailsModal({
                   </div>
                 </div>
               )}
+
+              <div className="flex gap-3 mb-6">
+                <button
+                  onClick={() => onSendEmail && onSendEmail(lead)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/20"
+                >
+                  <Mail size={14} /> Send Email
+                </button>
+              </div>
 
               <div className="flex gap-4 mb-6">
                 <button onClick={() => setActiveTab('notes')}

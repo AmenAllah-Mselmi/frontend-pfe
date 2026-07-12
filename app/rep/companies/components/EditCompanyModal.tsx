@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Building2, Users, Mail, Phone, MapPin } from 'lucide-react';
+import { X, Building2, Users, Mail, Phone, MapPin, DollarSign } from 'lucide-react';
 import { useForm } from '@/lib/hooks/useForm';
 import { validators } from '@/lib/utils/validation';
 import FormField from '@/components/Form/FormField';
@@ -13,7 +13,8 @@ export default function EditCompanyModal({ company, onClose, onSave }: any) {
       companySize: company.companySize || 'SMALL',
       location: company.location || '',
       email: company.email || '',
-      phone: company.phone || ''
+      phone: company.phone || '',
+      revenue: company.revenue || 0
     },
     validationSchema: {
       name: [validators.required, validators.minLength(2)],
@@ -135,6 +136,22 @@ export default function EditCompanyModal({ company, onClose, onSave }: any) {
               />
             </FormField>
           </div>
+
+          <FormField
+            label="Annual Revenue ($)"
+            name="revenue"
+            error={errors.revenue}
+            touched={touched.revenue}
+            icon={DollarSign}
+          >
+            <input 
+              type="number" 
+              placeholder="0" 
+              value={values.revenue} 
+              onChange={(e) => handleChange('revenue', Number(e.target.value))} 
+              onBlur={() => handleBlur('revenue')}
+            />
+          </FormField>
 
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-2">
             <button 

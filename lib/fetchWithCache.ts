@@ -1,6 +1,7 @@
 /**
  * A lightweight caching wrapper around the native fetch API.
  * This is designed to reduce redundant GET requests to the backend.
+ * It also automatically injects the Authorization header from the auth store.
  */
 
 interface CacheItem {
@@ -14,7 +15,29 @@ const cache = new Map<string, CacheItem>();
 // Default cache duration: 5 minutes
 const DEFAULT_TTL = 5 * 60 * 1000;
 
+function getAuthToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = localStorage.getItem('auth-storage');
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed?.state?.token || null;
+    } catch {
+        return null;
+    }
+}
+
 export async function fetchWithCache(url: string | URL | Request, options?: RequestInit, ttl: number = DEFAULT_TTL): Promise<Response> {
+    // Inject Authorization header if a token exists
+    const token = getAuthToken();
+    if (token) {
+        const existingHeaders = new Headers(options?.headers);
+        if (!existingHeaders.has('Authorization')) {
+            existingHeaders.set('Authorization', `Bearer ${token}`);
+        }
+        options = { ...options, headers: existingHeaders };
+    }
+
     const urlString = url.toString();
     const method = options?.method?.toUpperCase() || 'GET';
 

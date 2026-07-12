@@ -44,7 +44,7 @@ function LeadsContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const { leads, totalItems, loadLeads, addLead, updateLead } = useLeadStore();
+  const { leads, totalItems, loadLeads, addLead, updateLead, deleteLead } = useLeadStore();
   const { notes, loadNotes, addNote, updateNote, deleteNote } = useNoteStore();
   const { tasks, loadTasks, addTask, updateTask, deleteTask } = useTaskStore();
   const { users, loadUsers } = useUserStore();
@@ -159,6 +159,18 @@ function LeadsContent() {
 
   const handleDeleteTask = async (leadId: number, taskId: number) => {
     await deleteTask(taskId);
+  };
+
+  const handleUpdateLead = async (leadId: number, data: any) => {
+    await updateLead(leadId, data);
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleDeleteLead = async (leadId: number) => {
+    await deleteLead(leadId);
+    setShowDetails(false);
+    setSelectedLead(null);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleImport = async (importedLeads: any[]) => {
@@ -506,19 +518,25 @@ function LeadsContent() {
           ]}
         />
       )}
-      {showDetails && activeLead && (
+      {showDetails && selectedLead && (
         <LeadDetailsModal
-          lead={activeLead}
+          lead={selectedLead}
+          currentUser={currentUserId}
           onClose={() => setShowDetails(false)}
           onAddNote={handleAddNote}
-          onDeleteNote={handleDeleteNote}
           onUpdateNote={handleUpdateNote}
+          onDeleteNote={handleDeleteNote}
           onAddTask={handleAddTask}
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
-          currentUser={CURRENT_USER}
+          onUpdateLead={handleUpdateLead}
+          onDeleteLead={handleDeleteLead}
           onConvertToContact={handleConvertToContact}
           onConvertToDeal={handleConvertToDeal}
+          onSendEmail={(lead: any) => {
+            setSelectedForEmail(lead);
+            setShowEmail(true);
+          }}
           refreshTrigger={refreshTrigger}
         />
       )}
